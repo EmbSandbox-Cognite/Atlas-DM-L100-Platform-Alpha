@@ -1,0 +1,6 @@
+{
+    "name": "<Pattern name>",
+    "description": "<One or two sentences. Short description of the pattern>",
+    "type": "notebook",
+    "tags": ["tags", "noteboks", "mqtt"]
+  }
