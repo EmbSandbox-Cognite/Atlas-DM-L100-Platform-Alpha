@@ -1,0 +1,9 @@
+# OFF by default (SPEC section 7): "0 0 29 2 *" fires only on Feb 29.
+# To go live every 10 minutes, set cronExpression to "*/10 * * * *" and redeploy.
+- name: Platform Alpha Time Series Generator
+  functionExternalId: fn_pal_ts_generator
+  description: Generates Platform Alpha pump time series datapoints. Off by default; set cron to */10 * * * * to run live.
+  cronExpression: "0 0 29 2 *"
+  authentication:
+    clientId: {{ functionClientId }}
+    clientSecret: {{ functionClientSecret }}

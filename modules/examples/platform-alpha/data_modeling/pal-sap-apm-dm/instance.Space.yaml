@@ -1,0 +1,3 @@
+space: '{{ instanceSpace }}'
+name: Platform Alpha Instance Space
+description: Instance space for Platform Alpha demo data

@@ -1,0 +1,40 @@
+- externalId: pal_doc_FS-MARK3-IOM_B
+  space: {{ instanceSpace }}
+  name: FS-MARK3-IOM_RevB.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_FS-MARK3-IOM_C
+  space: {{ instanceSpace }}
+  name: FS-MARK3-IOM_RevC.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_PAL-50-DS-0101_0
+  space: {{ instanceSpace }}
+  name: PAL-50-DS-0101_Rev0.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_PAL-TR-CM-001_4
+  space: {{ instanceSpace }}
+  name: PAL-TR-CM-001_Rev4.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_KLS-KLU60-OM_A
+  space: {{ instanceSpace }}
+  name: KLS-KLU60-OM_RevA.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_MOC-2026-014_1
+  space: {{ instanceSpace }}
+  name: MOC-2026-014_Rev1.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_OA-2026-0415_0
+  space: {{ instanceSpace }}
+  name: OA-2026-0415_Rev0.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_OA-2026-0908_0
+  space: {{ instanceSpace }}
+  name: OA-2026-0908_Rev0.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_IR-2026-0828_0
+  space: {{ instanceSpace }}
+  name: IR-2026-0828_Rev0.pdf
+  mimeType: application/pdf
+- externalId: pal_doc_PAL-50-PID-0001_2
+  space: {{ instanceSpace }}
+  name: PAL-50-PID-0001_Rev2.pdf
+  mimeType: application/pdf

@@ -1,0 +1,14 @@
+space: {{ schemaSpace }}
+externalId: PalServedBy
+name: Pal Served By
+description: Edge properties for pump to lube oil unit servedBy connections.
+version: {{ datamodelVersion }}
+properties:
+  lineNumber:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalServedBy
+      type: container
+    containerPropertyIdentifier: lineNumber
+    name: Line number
+    description: P&ID line number for the servedBy connection.

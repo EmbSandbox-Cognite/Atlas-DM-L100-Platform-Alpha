@@ -1,0 +1,95 @@
+space: {{ schemaSpace }}
+externalId: PalLubeOilUnit
+name: Pal Lube Oil Unit
+description: Lube oil system equipment for Platform Alpha.
+implements:
+- space: cdf_cdm
+  externalId: CogniteEquipment
+  version: v1
+  type: view
+version: {{ datamodelVersion }}
+properties:
+  asset:
+    container:
+      space: cdf_cdm
+      externalId: CogniteEquipment
+      type: container
+    containerPropertyIdentifier: asset
+    name: Asset
+    description: The asset the equipment is related to.
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      version: {{ datamodelVersion }}
+      type: view
+  equipmentType:
+    container:
+      space: cdf_cdm
+      externalId: CogniteEquipment
+      type: container
+    containerPropertyIdentifier: equipmentType
+    name: Equipment type
+    source:
+      space: cdf_cdm
+      externalId: CogniteEquipmentType
+      version: v1
+      type: view
+  sapEquipmentNumber:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+      type: container
+    containerPropertyIdentifier: sapEquipmentNumber
+    name: SAP equipment number
+  maintenancePlant:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+      type: container
+    containerPropertyIdentifier: maintenancePlant
+    name: Maintenance plant
+  workCenter:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+      type: container
+    containerPropertyIdentifier: workCenter
+    name: Work center
+  plannerGroup:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+      type: container
+    containerPropertyIdentifier: plannerGroup
+    name: Planner group
+  oilGrade:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalLubeOilUnit
+      type: container
+    containerPropertyIdentifier: oilGrade
+    name: Oil grade
+  reservoirVolumeL:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalLubeOilUnit
+      type: container
+    containerPropertyIdentifier: reservoirVolumeL
+    name: Reservoir volume (L)
+    description: Nominal oil reservoir volume in litres.
+  serves:
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      version: {{ datamodelVersion }}
+      type: view
+    through:
+      source:
+        space: {{ schemaSpace }}
+        externalId: PalPump
+        version: {{ datamodelVersion }}
+        type: view
+      identifier: servedByUnit
+    name: Serves
+    description: Pumps served by this lube oil unit.
+    connectionType: multi_reverse_direct_relation

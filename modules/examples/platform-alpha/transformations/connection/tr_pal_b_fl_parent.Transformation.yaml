@@ -1,0 +1,15 @@
+externalId: tr_pal_b_fl_parent
+name: Platform Alpha Pass B - PalFunctionalLocation
+destination:
+  type: nodes
+  view:
+    space: {{ schemaSpace }}
+    externalId: PalFunctionalLocation
+    version: {{ datamodelVersion }}
+  instanceSpace: {{ instanceSpace }}
+ignoreNullFields: true
+isPublic: true
+conflictMode: upsert
+authentication:
+  clientId: ${IDP_CLIENT_ID}
+  clientSecret: ${IDP_CLIENT_SECRET}

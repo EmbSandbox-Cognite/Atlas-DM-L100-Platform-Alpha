@@ -1,0 +1,11 @@
+- externalId: fn_pal_ts_generator
+  name: Platform Alpha Time Series Generator
+  description: Generates synthetic time series datapoints for Platform Alpha demo pumps
+  owner: Data Engineering
+  functionPath: handler.py
+  runtime: py314
+  space: {{ functionSpace }}
+  cpu: 0.25
+  memory: 1.0
+  metadata:
+    version: "v1.0.0"

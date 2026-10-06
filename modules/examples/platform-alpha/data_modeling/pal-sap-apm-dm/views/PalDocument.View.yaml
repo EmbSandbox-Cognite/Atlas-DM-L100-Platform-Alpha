@@ -1,0 +1,76 @@
+space: {{ schemaSpace }}
+externalId: PalDocument
+name: Pal Document
+description: Engineering document mapped to CogniteFile.
+implements:
+- space: cdf_cdm
+  externalId: CogniteFile
+  version: v1
+  type: view
+version: {{ datamodelVersion }}
+properties:
+  documentNumber:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: documentNumber
+    name: Document number
+  documentType:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: documentType
+    name: Document type
+  revision:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: revision
+    name: Revision
+  documentStatus:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: documentStatus
+    name: Document status
+  issueDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: issueDate
+    name: Issue date
+  authority:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: authority
+    name: Authority
+  applicability:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: applicability
+    name: Applicability
+  discipline:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: discipline
+    name: Discipline
+  appliesTo:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalDocument
+      type: container
+    containerPropertyIdentifier: appliesTo
+    name: Applies to
+    description: Equipment this document applies to (PalPump or PalLubeOilUnit).
+    # Polymorphic: no source — targets both PalPump and PalLubeOilUnit instances.

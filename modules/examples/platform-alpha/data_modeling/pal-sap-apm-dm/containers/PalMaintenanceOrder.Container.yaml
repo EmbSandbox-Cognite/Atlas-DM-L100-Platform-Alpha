@@ -1,0 +1,102 @@
+space: {{ schemaSpace }}
+externalId: PalMaintenanceOrder
+usedFor: node
+name: Pal Maintenance Order
+description: SAP maintenance order attributes (type, priority, status, planned and basic dates, source notification).
+properties:
+  orderNumber:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  orderType:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  priority:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  shortText:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  status:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  plannedStartDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  plannedEndDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  basicStartDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  basicEndDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  mainWorkCenter:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  notification:
+    type:
+      type: direct
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+constraints:
+  requiredActivity:
+    constraintType: requires
+    require:
+      type: container
+      space: cdf_cdm
+      externalId: CogniteActivity
+indexes:
+  notification:
+    indexType: btree
+    properties:
+      - notification
+    cursorable: true

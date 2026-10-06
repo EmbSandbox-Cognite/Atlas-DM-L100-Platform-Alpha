@@ -1,0 +1,128 @@
+space: {{ schemaSpace }}
+externalId: PalFunctionalLocation
+name: Pal Functional Location
+description: SAP functional location mapped to CogniteAsset.
+implements:
+- space: cdf_cdm
+  externalId: CogniteAsset
+  version: v1
+  type: view
+version: {{ datamodelVersion }}
+properties:
+  parent:
+    container:
+      space: cdf_cdm
+      externalId: CogniteAsset
+      type: container
+    containerPropertyIdentifier: assetHierarchy_parent
+    name: Parent
+    description: The parent of the asset.
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      version: {{ datamodelVersion }}
+      type: view
+  assetClass:
+    container:
+      space: cdf_cdm
+      externalId: CogniteAsset
+      type: container
+    containerPropertyIdentifier: assetClass
+    name: Asset class
+    description: Specifies the class of the asset.
+    source:
+      space: cdf_cdm
+      externalId: CogniteAssetClass
+      version: v1
+      type: view
+  sapFunctionalLocation:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: sapFunctionalLocation
+    name: SAP functional location
+  structureLevel:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: structureLevel
+    name: Structure level
+  levelType:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: levelType
+    name: Level type
+  iso14224Level:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: iso14224Level
+    name: ISO 14224 level
+  flCategory:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: flCategory
+    name: Functional location category
+  maintenancePlant:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: maintenancePlant
+    name: Maintenance plant
+  planningPlant:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: planningPlant
+    name: Planning plant
+  location:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: location
+    name: Location
+  plantSection:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: plantSection
+    name: Plant section
+  workCenter:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: workCenter
+    name: Work center
+  plannerGroup:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: plannerGroup
+    name: Planner group
+  costCenter:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: costCenter
+    name: Cost center
+  companyCode:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      type: container
+    containerPropertyIdentifier: companyCode
+    name: Company code

@@ -1,0 +1,1270 @@
+name: Publish App Store Package to CDF
+
+# =============================================================================
+# 🎯 GENERIC WORKFLOW - WORKS WITH ANY REPOSITORY STRUCTURE
+# =============================================================================
+# 
+# This workflow creates and publishes zip packages to CDF projects.
+# 
+# ⚠️ CRITICAL: DO NOT MODIFY THE CORE LOGIC BELOW - This workflow is designed
+# to work generically across different repository structures. Changes to the
+# React app detection, zip creation, or source directory detection logic
+# may break compatibility with existing repositories.
+#
+# =============================================================================
+# 📦 TWO-STEP ZIP CREATION PROCESS (DO NOT CHANGE THIS LOGIC)
+# =============================================================================
+#
+# STEP 1: REACT APP ZIPS (Individual dist/ folder zips)
+#   - Finds ALL React apps in repository (any directory with package.json + app.json)
+#   - For EACH React app found:
+#     * Builds the app (npm/pnpm/yarn install && build)
+#     * Creates {app-name}.zip containing ONLY the dist/ folder contents
+#     * This zip has index.html and assets/ at the ROOT level
+#   - These individual React app zips are stored temporarily
+#
+# STEP 2: CONTAINER ZIP (Main package zip)
+#   - Creates ONE container zip: {repo-name}-{branch}.zip
+#   - Includes ALL files from the source directory (modules/, cog-demos/, or root)
+#   - Excludes: node_modules, __pycache__, .git, build artifacts, etc.
+#   - ADDS BACK the React app zips (from Step 1) into the container zip
+#   - Final structure: container zip contains source files + React app zips
+#
+# =============================================================================
+# 🏗️ SUPPORTED REPOSITORY STRUCTURES
+# =============================================================================
+#
+# STRUCTURE 1: Multi-module repository (e.g., QuickStartTM)
+#   Repository/
+#   ├── modules/
+#   │   ├── module1/
+#   │   │   └── react-app/          ← React app here
+#   │   │       ├── package.json
+#   │   │       ├── app.json
+#   │   │       └── dist/           ← Built output
+#   │   └── module2/
+#   └── ...
+#   → Source directory: modules/
+#   → React apps found: modules/module1/react-app/
+#   → Container zip: {repo}-{branch}.zip contains modules/ + react-app.zip
+#
+# STRUCTURE 2: Cognite samples style (e.g., cognite-samples)
+#   Repository/
+#   ├── cog-demos/
+#   │   ├── modules/
+#   │   │   └── react-app/          ← React app here
+#   │   └── ...
+#   └── ...
+#   → Source directory: cog-demos/
+#   → React apps found: cog-demos/modules/react-app/
+#   → Container zip: {repo}-{branch}.zip contains cog-demos/ + react-app.zip
+#
+# STRUCTURE 3: Root-level React app (e.g., argus-ai)
+#   Repository/
+#   ├── package.json                ← React app at root
+#   ├── app.json
+#   ├── tsconfig.json
+#   ├── src/
+#   └── dist/                       ← Built output
+#   → Source directory: . (root)
+#   → React app found: . (root directory)
+#   → Container zip: {repo}-{branch}.zip contains root files + {repo-name}.zip
+#
+# STRUCTURE 4: Mixed (root React app + modules)
+#   Repository/
+#   ├── package.json                ← React app at root
+#   ├── app.json
+#   ├── modules/
+#   │   └── react-app/              ← Another React app
+#   └── ...
+#   → Source directory: . (root) or modules/ (if exists)
+#   → React apps found: . (root) + modules/react-app/
+#   → Container zip contains both React app zips
+#
+# =============================================================================
+# 🔍 AUTO-DETECTION LOGIC (DO NOT CHANGE)
+# =============================================================================
+#
+# Source Directory Detection (in order):
+#   1. If modules/ exists → use modules/
+#   2. Else if cog-demos/ exists → use cog-demos/
+#   3. Else → use repository root (.)
+#
+# React App Detection:
+#   - Searches entire source directory recursively
+#   - Finds any directory containing BOTH package.json AND app.json
+#   - Can find apps at root level, in subdirectories, or nested deep
+#
+# =============================================================================
+# 📋 ZIP FILE NAMING
+# =============================================================================
+#
+# React App Zips: {app-directory-name}.zip
+#   - Example: If app is in "modules/my-app/", zip is "my-app.zip"
+#   - Example: If app is at root, zip is "{repo-name}.zip"
+#
+# Container Zip: {owner}-{repo-name}-{branch}.zip
+#   - Example: "cognitedata-quickstarttm-workspace.zip"
+#   - Example: "cognitedata-argus-ai-main.zip"
+#
+# =============================================================================
+# ⚙️ CONFIGURATION REQUIRED
+# =============================================================================
+# 
+# 1. GitHub Environment Setup:
+#    - Create GitHub environment(s) (e.g., 'demodatalake', 'production')
+#    - Add CDF credentials as environment variables:
+#      * CDF_PROJECT
+#      * CDF_CLUSTER
+#      * CDF_URL
+#      * IDP_CLIENT_ID
+#      * IDP_CLIENT_SECRET (as secret)
+#      * IDP_TENANT_ID
+#      * IDP_TOKEN_URL
+#
+# 2. Branch Configuration (optional):
+#    - Main branch: Update 'main-targets' matrix with production environments
+#    - Feature branches: Update 'branch-targets' matrix with dev environments
+#    - Default: Works with all branches automatically
+#
+# =============================================================================
+# 🚨 IMPORTANT NOTES FOR FUTURE EDITS
+# =============================================================================
+#
+# 1. React App Zip Creation:
+#    - MUST zip ONLY dist/ folder contents (cd dist && zip -r ../app.zip .)
+#    - This ensures index.html is at root of zip (required for CDF deployment)
+#    - DO NOT zip the entire app directory (would include source files)
+#
+# 2. Container Zip Creation:
+#    - MUST exclude *.zip initially (to avoid including React app zips twice)
+#    - MUST add React app zips back using zip -g (adds to existing zip)
+#    - This ensures React app zips are INSIDE the container zip
+#
+# 3. Source Directory Detection:
+#    - MUST check modules/ first, then cog-demos/, then root
+#    - MUST handle root-level React apps (argus-ai scenario)
+#    - DO NOT hardcode directory names
+#
+# 4. React App Detection:
+#    - MUST search recursively in source directory
+#    - MUST require BOTH package.json AND app.json
+#    - MUST handle root-level apps (package.json at repository root)
+#
+# 5. Exclusion Patterns:
+#    - MUST use **/ wildcards for generic patterns
+#    - DO NOT add repo-specific exclusions (valhall, doc_classifier, etc.)
+#    - DO NOT exclude dist/ folders (needed for React app zips)
+#
+# =============================================================================
+
+on:
+  push:
+    branches:
+      - '**'  # Triggers on all branches
+    
+    paths:
+      # Watch common source directories and workflow file
+      - 'modules/**'
+      - 'cog-demos/**'
+      - '.github/workflows/publish-app-store-package.yml'
+
+  # Manual trigger for testing
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: 'Target CDF environment name'
+        required: true
+        default: 'demodatalake'
+      source_directory:
+        description: 'Source directory to package (leave empty for auto-detect)'
+        required: false
+        default: ''
+
+jobs:
+  # ==========================================================================
+  # 🏭 MAIN BRANCH: Publish to ALL production CDF projects
+  # ==========================================================================
+  publish-to-main-targets:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # ====== ADD PRODUCTION CDF PROJECTS HERE ======
+        # Each entry needs a corresponding GitHub environment configured
+        target:
+          - environment: demodatalake
+            description: "Primary demo environment"
+          # - environment: customer-demo-1
+          #   description: "Customer demo environment"
+    
+    environment: ${{ matrix.target.environment }}
+    name: "Main → ${{ matrix.target.environment }}"
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install Python dependencies
+        run: pip install cognite-sdk>=7.0.0
+      
+      - name: Detect Source Directory
+        id: detect-source
+        run: |
+          # Auto-detect source directory: modules/, cog-demos/, or root
+          if [ -d "modules" ]; then
+            SOURCE_DIR="modules"
+          elif [ -d "cog-demos" ]; then
+            SOURCE_DIR="cog-demos"
+          else
+            SOURCE_DIR="."
+            echo "⚠️ No modules/ or cog-demos/ found, using repository root"
+          fi
+          echo "SOURCE_DIR=${SOURCE_DIR}" >> $GITHUB_OUTPUT
+          echo "📁 Detected source directory: ${SOURCE_DIR}"
+      
+      - name: Detect React Apps
+        id: detect-react-apps
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          echo "🔍 Scanning for React apps in ${SOURCE_DIR}..."
+          
+          # Initialize mapping file for app names (handles root-level apps)
+          > react_apps_map.txt
+          
+          # Find all directories with package.json + app.json
+          REACT_APPS=""
+          while IFS= read -r app_dir; do
+            if [ -f "$app_dir/app.json" ]; then
+            # Handle root-level apps: if app_dir is "." or empty, use repo name
+            if [ "$app_dir" = "." ] || [ -z "$app_dir" ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+              REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+              app_name=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+            else
+              app_name=$(basename "$app_dir")
+            fi
+            echo "📦 Found React app: $app_name at $app_dir"
+            REACT_APPS="${REACT_APPS}${app_dir}\n"
+            echo "${app_dir}|${app_name}" >> react_apps_map.txt
+            fi
+          done < <(find "${SOURCE_DIR}" -name "package.json" -type f -exec dirname {} \; 2>/dev/null | sort -u)
+          
+          if [ -z "$REACT_APPS" ]; then
+            echo "✅ No React apps found"
+            echo "REACT_APPS_COUNT=0" >> $GITHUB_OUTPUT
+          else
+            # Store as newline-separated list
+            echo -e "$REACT_APPS" | grep -v '^$' > react_apps.txt
+            REACT_APPS_COUNT=$(wc -l < react_apps.txt | tr -d ' ')
+            echo "REACT_APPS_COUNT=${REACT_APPS_COUNT}" >> $GITHUB_OUTPUT
+            echo "Found ${REACT_APPS_COUNT} React app(s)"
+            cat react_apps.txt
+          fi
+      
+      - name: Build React Apps
+        if: steps.detect-react-apps.outputs.REACT_APPS_COUNT > 0
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          echo "🔨 Building React apps..."
+          
+          while IFS= read -r app_dir; do
+            [ -z "$app_dir" ] && continue
+            
+            # Get app name from mapping file (handles root-level apps)
+            if [ -f "react_apps_map.txt" ]; then
+              app_name=$(grep "^${app_dir}|" react_apps_map.txt | cut -d'|' -f2)
+            fi
+            # Fallback to basename if mapping not found
+            if [ -z "$app_name" ]; then
+              if [ "$app_dir" = "." ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+                REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+                app_name=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+              else
+                app_name=$(basename "$app_dir")
+              fi
+            fi
+            
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🔨 Building: $app_name (at $app_dir)"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            
+            cd "$app_dir"
+            
+            # Detect package manager and install dependencies
+            echo "📦 Installing dependencies..."
+            if [ -f "pnpm-lock.yaml" ]; then
+              echo "📦 Using pnpm..."
+              npm install -g pnpm
+              # Configure pnpm to use public npm registry for @cognite packages if .npmrc has private registry
+              if [ -f ".npmrc" ] && grep -q "cognite.jfrog.io" .npmrc; then
+                echo "📦 Configuring pnpm to use public npm registry for @cognite packages..."
+                cp .npmrc .npmrc.backup || true
+                sed -i 's|@cognite:registry=https://cognite.jfrog.io/artifactory/api/npm/npm-virtual/|@cognite:registry=https://registry.npmjs.org/|' .npmrc || true
+                sed -i 's|//cognite.jfrog.io/artifactory/api/npm/npm-virtual/:_authToken=.*||' .npmrc || true
+              fi
+              pnpm install --frozen-lockfile
+              [ -f ".npmrc.backup" ] && mv .npmrc.backup .npmrc || true
+            elif [ -f "yarn.lock" ]; then
+              echo "📦 Using yarn..."
+              npm install -g yarn
+              yarn install --frozen-lockfile
+            elif [ -f "package-lock.json" ]; then
+              echo "📦 Using npm..."
+              npm ci
+            else
+              echo "📦 No lockfile found, using npm install..."
+              npm install
+            fi
+            
+            # Build the app
+            echo "🔨 Building app..."
+            if [ -f "pnpm-lock.yaml" ]; then
+              pnpm run build
+            elif [ -f "yarn.lock" ]; then
+              yarn build
+            else
+              npm run build
+            fi
+            
+            # Verify dist/ was created
+            if [ ! -d "dist" ] || [ ! -f "dist/index.html" ]; then
+              echo "❌ ERROR: dist/index.html not found after build"
+              exit 1
+            fi
+            
+            # Create zip: {app-name}.zip
+            # Zip ONLY dist/ contents (puts index.html and assets/ at root)
+            ZIP_NAME="${app_name}.zip"
+            echo "📦 Creating package: ${ZIP_NAME}"
+            
+            cd dist
+            zip -r "../${ZIP_NAME}" . -q
+            cd ..
+            
+            ZIP_SIZE=$(du -h "${ZIP_NAME}" | cut -f1)
+            echo "✅ Created ${ZIP_NAME} (${ZIP_SIZE})"
+            
+            cd - > /dev/null
+          done < react_apps.txt
+          
+          echo ""
+          echo "✅ All React apps built successfully"
+      
+      - name: Create Minimal Package Zip
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+          REPO_NAME=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+          ZIP_NAME="${REPO_NAME}-main.zip"
+          
+          echo "📦 Creating minimal zip for main branch..."
+          echo "   Source: ${SOURCE_DIR}"
+          echo "   Output: ${ZIP_NAME}"
+          
+          # Generic exclusion patterns - works for any repository
+          zip -r "${ZIP_NAME}" "${SOURCE_DIR}" \
+            -x "*.zip" \
+            -x "*.csv" \
+            -x "*.xlsx" \
+            -x "*.xls" \
+            -x "**/node_modules/*" \
+            -x "**/__pycache__/*" \
+            -x "**/*.pyc" \
+            -x "**/.git/*" \
+            -x "**/build/*" \
+            -x "**/dist/*" \
+            -x "**/*.egg-info/*" \
+            -x "**/.pytest_cache/*" \
+            -x "**/.venv/*" \
+            -x "**/venv/*" \
+            -x "**/env/*" \
+            -x "**/.env" \
+            -x "**/*.log" \
+            -x "**/downloads/*" \
+            -x "**/.DS_Store" \
+            -x "**/.idea/*" \
+            -x "**/.vscode/*" \
+            -q
+          
+          # Add back the React app zips that were excluded by *.zip pattern
+          echo "📦 Adding React app packages..."
+          
+          if [ -f "react_apps.txt" ] && [ -s "react_apps.txt" ]; then
+            while IFS= read -r app_dir; do
+              [ -z "$app_dir" ] && continue
+              
+              # Get app name from mapping file (handles root-level apps)
+              if [ -f "react_apps_map.txt" ]; then
+                app_name=$(grep "^${app_dir}|" react_apps_map.txt | cut -d'|' -f2)
+              fi
+              # Fallback to basename if mapping not found
+              if [ -z "$app_name" ]; then
+                if [ "$app_dir" = "." ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+                  app_name="${REPO_NAME}"
+                else
+                  app_name=$(basename "$app_dir")
+                fi
+              fi
+              
+              # Zip is created in the app directory with the mapped name
+              ZIP_PATH="${app_dir}/${app_name}.zip"
+              
+              if [ -f "$ZIP_PATH" ]; then
+                zip -g "${ZIP_NAME}" "$ZIP_PATH" -q
+                echo "✅ Added ${app_name}.zip to package"
+              else
+                echo "⚠️ ${app_name}.zip not found at $ZIP_PATH"
+              fi
+            done < react_apps.txt
+          else
+            echo "ℹ️ No React apps to include"
+          fi
+          
+          ZIP_SIZE_MB=$(du -m "${ZIP_NAME}" | cut -f1)
+          echo "✅ Created ${ZIP_NAME} (${ZIP_SIZE_MB} MB)"
+      
+      - name: Upload to CDF
+        env:
+          CDF_PROJECT: ${{ vars.CDF_PROJECT }}
+          CDF_CLUSTER: ${{ vars.CDF_CLUSTER }}
+          CDF_URL: ${{ vars.CDF_URL }}
+          IDP_CLIENT_ID: ${{ vars.IDP_CLIENT_ID }}
+          IDP_CLIENT_SECRET: ${{ secrets.IDP_CLIENT_SECRET }}
+          IDP_TENANT_ID: ${{ vars.IDP_TENANT_ID }}
+          IDP_TOKEN_URL: ${{ vars.IDP_TOKEN_URL }}
+        run: |
+          python << 'PYTHON_SCRIPT'
+          import os, sys, glob
+          from cognite.client import CogniteClient
+          from cognite.client.config import ClientConfig
+          from cognite.client.credentials import OAuthClientCredentials
+          from cognite.client.data_classes.data_modeling import NodeId
+          
+          cdf_project = os.getenv("CDF_PROJECT")
+          cdf_url = os.getenv("CDF_URL")
+          client_id = os.getenv("IDP_CLIENT_ID")
+          client_secret = os.getenv("IDP_CLIENT_SECRET")
+          token_url = os.getenv("IDP_TOKEN_URL")
+          
+          if not all([cdf_project, cdf_url, client_id, client_secret, token_url]):
+              print("❌ Missing CDF credentials in GitHub environment")
+              sys.exit(1)
+          
+          print(f"🔗 Connecting to {cdf_project}...")
+          
+          credentials = OAuthClientCredentials(
+              token_url=token_url,
+              client_id=client_id,
+              client_secret=client_secret,
+              scopes=[f"{cdf_url}/.default"]
+          )
+          
+          client = CogniteClient(ClientConfig(
+              client_name="GitHub-Action-Package-Publisher",
+              project=cdf_project,
+              base_url=cdf_url,
+              credentials=credentials
+          ))
+          
+          zip_file = glob.glob("*-main.zip")[0]
+          zip_filename = os.path.basename(zip_file)
+          external_id = zip_filename.replace('.zip', '')
+          package_base_name = zip_filename.replace('.zip', '').replace('-main', '')
+          
+          print(f"📦 Uploading {zip_filename}...")
+          
+          # Find and delete older versions with the same package base name
+          print(f"🔍 Checking for older versions of {package_base_name}...")
+          try:
+              from cognite.client.data_classes.data_modeling import ViewId
+              view_id = ViewId(space="cdf_cdm", external_id="CogniteFile", version="v1")
+              instances = client.data_modeling.instances.list(
+                  instance_type="node",
+                  sources=[view_id],
+                  space="app-packages",
+                  limit=1000
+              )
+              
+              packages_to_delete = []
+              for instance in instances:
+                  props = instance.properties or {}
+                  file_props = props.get("cdf_cdm/CogniteFile/v1", {}) or props.get("CogniteFile/v1", {})
+                  if isinstance(file_props, dict):
+                      instance_name = file_props.get("name", instance.external_id)
+                  else:
+                      instance_name = instance.external_id
+                  
+                  instance_base_name = instance_name.replace('.zip', '').replace('-main', '')
+                  if instance_base_name == package_base_name and instance.external_id != external_id:
+                      packages_to_delete.append((instance.external_id, instance_name))
+              
+              if packages_to_delete:
+                  print(f"🗑️  Found {len(packages_to_delete)} older version(s) to delete:")
+                  for old_external_id, old_name in packages_to_delete:
+                      print(f"   • {old_name} (externalId: {old_external_id})")
+                      try:
+                          client.files.delete(external_ids=[old_external_id])
+                          print(f"   ✅ Deleted file: {old_name}")
+                      except Exception as e:
+                          print(f"   ⚠️  Could not delete file {old_name}: {e}")
+                      try:
+                          client.data_modeling.instances.delete(
+                              instance_type="node",
+                              space="app-packages",
+                              external_id=old_external_id
+                          )
+                          print(f"   ✅ Deleted instance: {old_external_id}")
+                      except Exception as e:
+                          print(f"   ⚠️  Could not delete instance {old_external_id}: {e}")
+              else:
+                  print(f"✅ No older versions found")
+          except Exception as e:
+              print(f"⚠️  Could not check for older versions: {e}")
+              print(f"   Continuing with upload anyway...")
+          
+          # Upload new version
+          client.data_modeling.instances.apply(nodes=[{
+              "instanceType": "node",
+              "space": "app-packages",
+              "externalId": external_id,
+              "sources": [{
+                  "source": {"type": "view", "space": "cdf_cdm", "externalId": "CogniteFile", "version": "v1"},
+                  "properties": {"name": zip_filename, "mimeType": "application/zip"}
+              }]
+          }])
+          
+          client.files.upload_content(
+              path=zip_file,
+              instance_id=NodeId(space="app-packages", external_id=external_id)
+          )
+          
+          print(f"✅ Published to {cdf_project}: {zip_filename}")
+          PYTHON_SCRIPT
+
+  # ==========================================================================
+  # 🌿 FEATURE BRANCHES: Publish to development CDF projects
+  # ==========================================================================
+  publish-to-branch-targets:
+    if: github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # ====== ADD FEATURE BRANCH TARGETS HERE ======
+        # Each entry needs a corresponding GitHub environment configured
+        target:
+          - environment: demodatalake
+            description: "Development environment"
+    
+    environment: ${{ matrix.target.environment }}
+    name: "${{ github.ref_name }} → ${{ matrix.target.environment }}"
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install Python dependencies
+        run: pip install cognite-sdk>=7.0.0
+      
+      - name: Detect Source Directory
+        id: detect-source
+        run: |
+          # Auto-detect source directory: modules/, cog-demos/, or root
+          if [ -d "modules" ]; then
+            SOURCE_DIR="modules"
+          elif [ -d "cog-demos" ]; then
+            SOURCE_DIR="cog-demos"
+          else
+            SOURCE_DIR="."
+            echo "⚠️ No modules/ or cog-demos/ found, using repository root"
+          fi
+          echo "SOURCE_DIR=${SOURCE_DIR}" >> $GITHUB_OUTPUT
+          echo "📁 Detected source directory: ${SOURCE_DIR}"
+      
+      - name: Detect React Apps
+        id: detect-react-apps
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          echo "🔍 Scanning for React apps in ${SOURCE_DIR}..."
+          
+          # Initialize mapping file for app names (handles root-level apps)
+          > react_apps_map.txt
+          
+          # Find all directories with package.json + app.json
+          REACT_APPS=""
+          while IFS= read -r app_dir; do
+            if [ -f "$app_dir/app.json" ]; then
+            # Handle root-level apps: if app_dir is "." or empty, use repo name
+            if [ "$app_dir" = "." ] || [ -z "$app_dir" ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+              REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+              app_name=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+            else
+              app_name=$(basename "$app_dir")
+            fi
+            echo "📦 Found React app: $app_name at $app_dir"
+            REACT_APPS="${REACT_APPS}${app_dir}\n"
+            echo "${app_dir}|${app_name}" >> react_apps_map.txt
+            fi
+          done < <(find "${SOURCE_DIR}" -name "package.json" -type f -exec dirname {} \; 2>/dev/null | sort -u)
+          
+          if [ -z "$REACT_APPS" ]; then
+            echo "✅ No React apps found"
+            echo "REACT_APPS_COUNT=0" >> $GITHUB_OUTPUT
+          else
+            echo -e "$REACT_APPS" | grep -v '^$' > react_apps.txt
+            REACT_APPS_COUNT=$(wc -l < react_apps.txt | tr -d ' ')
+            echo "REACT_APPS_COUNT=${REACT_APPS_COUNT}" >> $GITHUB_OUTPUT
+            echo "Found ${REACT_APPS_COUNT} React app(s)"
+            cat react_apps.txt
+          fi
+      
+      - name: Build React Apps
+        if: steps.detect-react-apps.outputs.REACT_APPS_COUNT > 0
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          echo "🔨 Building React apps..."
+          
+          while IFS= read -r app_dir; do
+            [ -z "$app_dir" ] && continue
+            
+            # Get app name from mapping file (handles root-level apps)
+            if [ -f "react_apps_map.txt" ]; then
+              app_name=$(grep "^${app_dir}|" react_apps_map.txt | cut -d'|' -f2)
+            fi
+            # Fallback to basename if mapping not found
+            if [ -z "$app_name" ]; then
+              if [ "$app_dir" = "." ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+                REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+                app_name=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+              else
+                app_name=$(basename "$app_dir")
+              fi
+            fi
+            
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🔨 Building: $app_name (at $app_dir)"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            
+            cd "$app_dir"
+            
+            # Detect package manager and install dependencies
+            echo "📦 Installing dependencies..."
+            if [ -f "pnpm-lock.yaml" ]; then
+              echo "📦 Using pnpm..."
+              npm install -g pnpm
+              if [ -f ".npmrc" ] && grep -q "cognite.jfrog.io" .npmrc; then
+                echo "📦 Configuring pnpm to use public npm registry for @cognite packages..."
+                cp .npmrc .npmrc.backup || true
+                sed -i 's|@cognite:registry=https://cognite.jfrog.io/artifactory/api/npm/npm-virtual/|@cognite:registry=https://registry.npmjs.org/|' .npmrc || true
+                sed -i 's|//cognite.jfrog.io/artifactory/api/npm/npm-virtual/:_authToken=.*||' .npmrc || true
+              fi
+              pnpm install --frozen-lockfile
+              [ -f ".npmrc.backup" ] && mv .npmrc.backup .npmrc || true
+            elif [ -f "yarn.lock" ]; then
+              echo "📦 Using yarn..."
+              npm install -g yarn
+              yarn install --frozen-lockfile
+            elif [ -f "package-lock.json" ]; then
+              echo "📦 Using npm..."
+              npm ci
+            else
+              echo "📦 No lockfile found, using npm install..."
+              npm install
+            fi
+            
+            # Build the app
+            echo "🔨 Building app..."
+            if [ -f "pnpm-lock.yaml" ]; then
+              pnpm run build
+            elif [ -f "yarn.lock" ]; then
+              yarn build
+            else
+              npm run build
+            fi
+            
+            # Verify dist/ was created
+            if [ ! -d "dist" ] || [ ! -f "dist/index.html" ]; then
+              echo "❌ ERROR: dist/index.html not found after build"
+              exit 1
+            fi
+            
+            # Create zip: {app-name}.zip
+            ZIP_NAME="${app_name}.zip"
+            echo "📦 Creating package: ${ZIP_NAME}"
+            
+            cd dist
+            zip -r "../${ZIP_NAME}" . -q
+            cd ..
+            
+            ZIP_SIZE=$(du -h "${ZIP_NAME}" | cut -f1)
+            echo "✅ Created ${ZIP_NAME} (${ZIP_SIZE})"
+            
+            cd - > /dev/null
+          done < react_apps.txt
+          
+          echo ""
+          echo "✅ All React apps built successfully"
+      
+      - name: Create Minimal Package Zip
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///' | tr '/' '-' | tr '_' '-')
+          REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+          REPO_NAME=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+          ZIP_NAME="${REPO_NAME}-${BRANCH_NAME}.zip"
+          
+          echo "📦 Creating zip for branch: ${ZIP_NAME}"
+          echo "   Source: ${SOURCE_DIR}"
+          
+          # Generic exclusion patterns - works for any repository
+          zip -r "${ZIP_NAME}" "${SOURCE_DIR}" \
+            -x "*.zip" \
+            -x "*.csv" \
+            -x "*.xlsx" \
+            -x "*.xls" \
+            -x "**/node_modules/*" \
+            -x "**/__pycache__/*" \
+            -x "**/*.pyc" \
+            -x "**/.git/*" \
+            -x "**/build/*" \
+            -x "**/dist/*" \
+            -x "**/*.egg-info/*" \
+            -x "**/.pytest_cache/*" \
+            -x "**/.venv/*" \
+            -x "**/venv/*" \
+            -x "**/env/*" \
+            -x "**/.env" \
+            -x "**/*.log" \
+            -x "**/downloads/*" \
+            -x "**/.DS_Store" \
+            -x "**/.idea/*" \
+            -x "**/.vscode/*" \
+            -q
+          
+          # Add back the React app zips
+          echo "📦 Adding React app packages..."
+          
+          if [ -f "react_apps.txt" ] && [ -s "react_apps.txt" ]; then
+            while IFS= read -r app_dir; do
+              [ -z "$app_dir" ] && continue
+              
+              # Get app name from mapping file (handles root-level apps)
+              if [ -f "react_apps_map.txt" ]; then
+                app_name=$(grep "^${app_dir}|" react_apps_map.txt | cut -d'|' -f2)
+              fi
+              # Fallback to basename if mapping not found
+              if [ -z "$app_name" ]; then
+                if [ "$app_dir" = "." ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+                  app_name="${REPO_NAME}"
+                else
+                  app_name=$(basename "$app_dir")
+                fi
+              fi
+              
+              # Zip is created in the app directory with the mapped name
+              ZIP_PATH="${app_dir}/${app_name}.zip"
+              
+              if [ -f "$ZIP_PATH" ]; then
+                zip -g "${ZIP_NAME}" "$ZIP_PATH" -q
+                echo "✅ Added ${app_name}.zip to package"
+              else
+                echo "⚠️ ${app_name}.zip not found at $ZIP_PATH"
+              fi
+            done < react_apps.txt
+          else
+            echo "ℹ️ No React apps to include"
+          fi
+          
+          ZIP_SIZE_MB=$(du -m "${ZIP_NAME}" | cut -f1)
+          echo "✅ Created ${ZIP_NAME} (${ZIP_SIZE_MB} MB)"
+      
+      - name: Upload to CDF
+        env:
+          CDF_PROJECT: ${{ vars.CDF_PROJECT }}
+          CDF_CLUSTER: ${{ vars.CDF_CLUSTER }}
+          CDF_URL: ${{ vars.CDF_URL }}
+          IDP_CLIENT_ID: ${{ vars.IDP_CLIENT_ID }}
+          IDP_CLIENT_SECRET: ${{ secrets.IDP_CLIENT_SECRET }}
+          IDP_TENANT_ID: ${{ vars.IDP_TENANT_ID }}
+          IDP_TOKEN_URL: ${{ vars.IDP_TOKEN_URL }}
+        run: |
+          python << 'PYTHON_SCRIPT'
+          import os, sys, glob
+          from cognite.client import CogniteClient
+          from cognite.client.config import ClientConfig
+          from cognite.client.credentials import OAuthClientCredentials
+          from cognite.client.data_classes.data_modeling import NodeId
+          
+          cdf_project = os.getenv("CDF_PROJECT")
+          cdf_url = os.getenv("CDF_URL")
+          client_id = os.getenv("IDP_CLIENT_ID")
+          client_secret = os.getenv("IDP_CLIENT_SECRET")
+          token_url = os.getenv("IDP_TOKEN_URL")
+          
+          if not all([cdf_project, cdf_url, client_id, client_secret, token_url]):
+              print("❌ Missing CDF credentials in GitHub environment")
+              sys.exit(1)
+          
+          print(f"🔗 Connecting to {cdf_project}...")
+          
+          credentials = OAuthClientCredentials(
+              token_url=token_url,
+              client_id=client_id,
+              client_secret=client_secret,
+              scopes=[f"{cdf_url}/.default"]
+          )
+          
+          client = CogniteClient(ClientConfig(
+              client_name="GitHub-Action-Package-Publisher",
+              project=cdf_project,
+              base_url=cdf_url,
+              credentials=credentials
+          ))
+          
+          zip_file = glob.glob("*-*.zip")[0]  # Matches {repo}-{branch}.zip
+          zip_filename = os.path.basename(zip_file)
+          external_id = zip_filename.replace('.zip', '')
+          package_base_name = zip_filename.replace('.zip', '')
+          
+          print(f"📦 Uploading {zip_filename}...")
+          
+          # Find and delete older versions with the same package base name
+          print(f"🔍 Checking for older versions of {package_base_name}...")
+          try:
+              from cognite.client.data_classes.data_modeling import ViewId
+              view_id = ViewId(space="cdf_cdm", external_id="CogniteFile", version="v1")
+              instances = client.data_modeling.instances.list(
+                  instance_type="node",
+                  sources=[view_id],
+                  space="app-packages",
+                  limit=1000
+              )
+              
+              packages_to_delete = []
+              for instance in instances:
+                  props = instance.properties or {}
+                  file_props = props.get("cdf_cdm/CogniteFile/v1", {}) or props.get("CogniteFile/v1", {})
+                  if isinstance(file_props, dict):
+                      instance_name = file_props.get("name", instance.external_id)
+                  else:
+                      instance_name = instance.external_id
+                  
+                  instance_base_name = instance_name.replace('.zip', '')
+                  if instance_base_name == package_base_name and instance.external_id != external_id:
+                      packages_to_delete.append((instance.external_id, instance_name))
+              
+              if packages_to_delete:
+                  print(f"🗑️  Found {len(packages_to_delete)} older version(s) to delete:")
+                  for old_external_id, old_name in packages_to_delete:
+                      print(f"   • {old_name} (externalId: {old_external_id})")
+                      try:
+                          client.files.delete(external_ids=[old_external_id])
+                          print(f"   ✅ Deleted file: {old_name}")
+                      except Exception as e:
+                          print(f"   ⚠️  Could not delete file {old_name}: {e}")
+                      try:
+                          client.data_modeling.instances.delete(
+                              instance_type="node",
+                              space="app-packages",
+                              external_id=old_external_id
+                          )
+                          print(f"   ✅ Deleted instance: {old_external_id}")
+                      except Exception as e:
+                          print(f"   ⚠️  Could not delete instance {old_external_id}: {e}")
+              else:
+                  print(f"✅ No older versions found")
+          except Exception as e:
+              print(f"⚠️  Could not check for older versions: {e}")
+              print(f"   Continuing with upload anyway...")
+          
+          # Upload new version
+          client.data_modeling.instances.apply(nodes=[{
+              "instanceType": "node",
+              "space": "app-packages",
+              "externalId": external_id,
+              "sources": [{
+                  "source": {"type": "view", "space": "cdf_cdm", "externalId": "CogniteFile", "version": "v1"},
+                  "properties": {"name": zip_filename, "mimeType": "application/zip"}
+              }]
+          }])
+          
+          client.files.upload_content(
+              path=zip_file,
+              instance_id=NodeId(space="app-packages", external_id=external_id)
+          )
+          
+          print(f"✅ Published to {cdf_project}: {zip_filename}")
+          PYTHON_SCRIPT
+
+  # ==========================================================================
+  # 🔧 MANUAL TRIGGER: Publish to specified environment
+  # ==========================================================================
+  publish-manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.target_environment }}
+    name: "Manual → ${{ github.event.inputs.target_environment }}"
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install Python dependencies
+        run: pip install cognite-sdk>=7.0.0
+      
+      - name: Detect Source Directory
+        id: detect-source
+        run: |
+          # Use provided source directory or auto-detect
+          if [ -n "${{ github.event.inputs.source_directory }}" ]; then
+            SOURCE_DIR="${{ github.event.inputs.source_directory }}"
+            if [ ! -d "${SOURCE_DIR}" ]; then
+              echo "❌ ERROR: Source directory '${SOURCE_DIR}' does not exist"
+              exit 1
+            fi
+          elif [ -d "modules" ]; then
+            SOURCE_DIR="modules"
+          elif [ -d "cog-demos" ]; then
+            SOURCE_DIR="cog-demos"
+          else
+            SOURCE_DIR="."
+            echo "⚠️ No modules/ or cog-demos/ found, using repository root"
+          fi
+          echo "SOURCE_DIR=${SOURCE_DIR}" >> $GITHUB_OUTPUT
+          echo "📁 Using source directory: ${SOURCE_DIR}"
+      
+      - name: Detect React Apps
+        id: detect-react-apps
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          echo "🔍 Scanning for React apps in ${SOURCE_DIR}..."
+          
+          REACT_APPS=""
+          while IFS= read -r app_dir; do
+            if [ -f "$app_dir/app.json" ]; then
+            # Handle root-level apps: if app_dir is "." or empty, use repo name
+            if [ "$app_dir" = "." ] || [ -z "$app_dir" ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+              REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+              app_name=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+            else
+              app_name=$(basename "$app_dir")
+            fi
+            echo "📦 Found React app: $app_name at $app_dir"
+            REACT_APPS="${REACT_APPS}${app_dir}\n"
+            echo "${app_dir}|${app_name}" >> react_apps_map.txt
+            fi
+          done < <(find "${SOURCE_DIR}" -name "package.json" -type f -exec dirname {} \; 2>/dev/null | sort -u)
+          
+          if [ -z "$REACT_APPS" ]; then
+            echo "✅ No React apps found"
+            echo "REACT_APPS_COUNT=0" >> $GITHUB_OUTPUT
+          else
+            echo -e "$REACT_APPS" | grep -v '^$' > react_apps.txt
+            REACT_APPS_COUNT=$(wc -l < react_apps.txt | tr -d ' ')
+            echo "REACT_APPS_COUNT=${REACT_APPS_COUNT}" >> $GITHUB_OUTPUT
+            echo "Found ${REACT_APPS_COUNT} React app(s)"
+            cat react_apps.txt
+          fi
+      
+      - name: Build React Apps
+        if: steps.detect-react-apps.outputs.REACT_APPS_COUNT > 0
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          echo "🔨 Building React apps..."
+          
+          while IFS= read -r app_dir; do
+            [ -z "$app_dir" ] && continue
+            
+            # Get app name from mapping file (handles root-level apps)
+            if [ -f "react_apps_map.txt" ]; then
+              app_name=$(grep "^${app_dir}|" react_apps_map.txt | cut -d'|' -f2)
+            fi
+            # Fallback to basename if mapping not found
+            if [ -z "$app_name" ]; then
+              if [ "$app_dir" = "." ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+                REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+                app_name=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+              else
+                app_name=$(basename "$app_dir")
+              fi
+            fi
+            
+            echo ""
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🔨 Building: $app_name (at $app_dir)"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            
+            cd "$app_dir"
+            
+            echo "📦 Installing dependencies..."
+            if [ -f "pnpm-lock.yaml" ]; then
+              npm install -g pnpm
+              if [ -f ".npmrc" ] && grep -q "cognite.jfrog.io" .npmrc; then
+                cp .npmrc .npmrc.backup || true
+                sed -i 's|@cognite:registry=https://cognite.jfrog.io/artifactory/api/npm/npm-virtual/|@cognite:registry=https://registry.npmjs.org/|' .npmrc || true
+                sed -i 's|//cognite.jfrog.io/artifactory/api/npm/npm-virtual/:_authToken=.*||' .npmrc || true
+              fi
+              pnpm install --frozen-lockfile
+              [ -f ".npmrc.backup" ] && mv .npmrc.backup .npmrc || true
+            elif [ -f "yarn.lock" ]; then
+              npm install -g yarn
+              yarn install --frozen-lockfile
+            elif [ -f "package-lock.json" ]; then
+              npm ci
+            else
+              npm install
+            fi
+            
+            echo "🔨 Building app..."
+            if [ -f "pnpm-lock.yaml" ]; then
+              pnpm run build
+            elif [ -f "yarn.lock" ]; then
+              yarn build
+            else
+              npm run build
+            fi
+            
+            if [ ! -d "dist" ] || [ ! -f "dist/index.html" ]; then
+              echo "❌ ERROR: dist/index.html not found after build"
+              exit 1
+            fi
+            
+            ZIP_NAME="${app_name}.zip"
+            echo "📦 Creating package: ${ZIP_NAME}"
+            
+            cd dist
+            zip -r "../${ZIP_NAME}" . -q
+            cd ..
+            
+            ZIP_SIZE=$(du -h "${ZIP_NAME}" | cut -f1)
+            echo "✅ Created ${ZIP_NAME} (${ZIP_SIZE})"
+            
+            cd - > /dev/null
+          done < react_apps.txt
+          
+          echo ""
+          echo "✅ All React apps built successfully"
+      
+      - name: Create Minimal Package Zip
+        run: |
+          SOURCE_DIR="${{ steps.detect-source.outputs.SOURCE_DIR }}"
+          BRANCH_NAME=$(echo "${{ github.ref }}" | sed 's/refs\/heads\///' | tr '/' '-' | tr '_' '-')
+          REPO_NAME="${{ github.repository_owner }}-${{ github.event.repository.name }}"
+          REPO_NAME=$(echo "${REPO_NAME}" | tr '[:upper:]' '[:lower:]' | tr '/' '-')
+          ZIP_NAME="${REPO_NAME}-${BRANCH_NAME}.zip"
+          
+          echo "📦 Creating zip: ${ZIP_NAME}"
+          echo "   Source: ${SOURCE_DIR}"
+          
+          zip -r "${ZIP_NAME}" "${SOURCE_DIR}" \
+            -x "*.zip" \
+            -x "*.csv" \
+            -x "*.xlsx" \
+            -x "*.xls" \
+            -x "**/node_modules/*" \
+            -x "**/__pycache__/*" \
+            -x "**/*.pyc" \
+            -x "**/.git/*" \
+            -x "**/build/*" \
+            -x "**/dist/*" \
+            -x "**/*.egg-info/*" \
+            -x "**/.pytest_cache/*" \
+            -x "**/.venv/*" \
+            -x "**/venv/*" \
+            -x "**/env/*" \
+            -x "**/.env" \
+            -x "**/*.log" \
+            -x "**/downloads/*" \
+            -x "**/.DS_Store" \
+            -x "**/.idea/*" \
+            -x "**/.vscode/*" \
+            -q
+          
+          echo "📦 Adding React app packages..."
+          
+          if [ -f "react_apps.txt" ] && [ -s "react_apps.txt" ]; then
+            while IFS= read -r app_dir; do
+              [ -z "$app_dir" ] && continue
+              
+              # Get app name from mapping file (handles root-level apps)
+              if [ -f "react_apps_map.txt" ]; then
+                app_name=$(grep "^${app_dir}|" react_apps_map.txt | cut -d'|' -f2)
+              fi
+              # Fallback to basename if mapping not found
+              if [ -z "$app_name" ]; then
+                if [ "$app_dir" = "." ] || [ "$app_dir" = "${SOURCE_DIR}" ]; then
+                  app_name="${REPO_NAME}"
+                else
+                  app_name=$(basename "$app_dir")
+                fi
+              fi
+              
+              # Zip is created in the app directory with the mapped name
+              ZIP_PATH="${app_dir}/${app_name}.zip"
+              
+              if [ -f "$ZIP_PATH" ]; then
+                zip -g "${ZIP_NAME}" "$ZIP_PATH" -q
+                echo "✅ Added ${app_name}.zip to package"
+              else
+                echo "⚠️ ${app_name}.zip not found at $ZIP_PATH"
+              fi
+            done < react_apps.txt
+          else
+            echo "ℹ️ No React apps to include"
+          fi
+          
+          ZIP_SIZE_MB=$(du -m "${ZIP_NAME}" | cut -f1)
+          echo "✅ Created ${ZIP_NAME} (${ZIP_SIZE_MB} MB)"
+      
+      - name: Upload to CDF
+        env:
+          CDF_PROJECT: ${{ vars.CDF_PROJECT }}
+          CDF_CLUSTER: ${{ vars.CDF_CLUSTER }}
+          CDF_URL: ${{ vars.CDF_URL }}
+          IDP_CLIENT_ID: ${{ vars.IDP_CLIENT_ID }}
+          IDP_CLIENT_SECRET: ${{ secrets.IDP_CLIENT_SECRET }}
+          IDP_TENANT_ID: ${{ vars.IDP_TENANT_ID }}
+          IDP_TOKEN_URL: ${{ vars.IDP_TOKEN_URL }}
+        run: |
+          python << 'PYTHON_SCRIPT'
+          import os, sys, glob
+          from cognite.client import CogniteClient
+          from cognite.client.config import ClientConfig
+          from cognite.client.credentials import OAuthClientCredentials
+          from cognite.client.data_classes.data_modeling import NodeId
+          
+          cdf_project = os.getenv("CDF_PROJECT")
+          cdf_url = os.getenv("CDF_URL")
+          client_id = os.getenv("IDP_CLIENT_ID")
+          client_secret = os.getenv("IDP_CLIENT_SECRET")
+          token_url = os.getenv("IDP_TOKEN_URL")
+          
+          if not all([cdf_project, cdf_url, client_id, client_secret, token_url]):
+              print("❌ Missing CDF credentials")
+              sys.exit(1)
+          
+          print(f"🔗 Connecting to {cdf_project}...")
+          
+          credentials = OAuthClientCredentials(
+              token_url=token_url,
+              client_id=client_id,
+              client_secret=client_secret,
+              scopes=[f"{cdf_url}/.default"]
+          )
+          
+          client = CogniteClient(ClientConfig(
+              client_name="GitHub-Action-Package-Publisher",
+              project=cdf_project,
+              base_url=cdf_url,
+              credentials=credentials
+          ))
+          
+          zip_file = glob.glob("*-*.zip")[0]
+          zip_filename = os.path.basename(zip_file)
+          external_id = zip_filename.replace('.zip', '')
+          package_base_name = zip_filename.replace('.zip', '')
+          
+          print(f"📦 Uploading {zip_filename}...")
+          
+          print(f"🔍 Checking for older versions of {package_base_name}...")
+          try:
+              from cognite.client.data_classes.data_modeling import ViewId
+              view_id = ViewId(space="cdf_cdm", external_id="CogniteFile", version="v1")
+              instances = client.data_modeling.instances.list(
+                  instance_type="node",
+                  sources=[view_id],
+                  space="app-packages",
+                  limit=1000
+              )
+              
+              packages_to_delete = []
+              for instance in instances:
+                  props = instance.properties or {}
+                  file_props = props.get("cdf_cdm/CogniteFile/v1", {}) or props.get("CogniteFile/v1", {})
+                  if isinstance(file_props, dict):
+                      instance_name = file_props.get("name", instance.external_id)
+                  else:
+                      instance_name = instance.external_id
+                  
+                  instance_base_name = instance_name.replace('.zip', '')
+                  if instance_base_name == package_base_name and instance.external_id != external_id:
+                      packages_to_delete.append((instance.external_id, instance_name))
+              
+              if packages_to_delete:
+                  print(f"🗑️  Found {len(packages_to_delete)} older version(s) to delete:")
+                  for old_external_id, old_name in packages_to_delete:
+                      print(f"   • {old_name} (externalId: {old_external_id})")
+                      try:
+                          client.files.delete(external_ids=[old_external_id])
+                          print(f"   ✅ Deleted file: {old_name}")
+                      except Exception as e:
+                          print(f"   ⚠️  Could not delete file {old_name}: {e}")
+                      try:
+                          client.data_modeling.instances.delete(
+                              instance_type="node",
+                              space="app-packages",
+                              external_id=old_external_id
+                          )
+                          print(f"   ✅ Deleted instance: {old_external_id}")
+                      except Exception as e:
+                          print(f"   ⚠️  Could not delete instance {old_external_id}: {e}")
+              else:
+                  print(f"✅ No older versions found")
+          except Exception as e:
+              print(f"⚠️  Could not check for older versions: {e}")
+              print(f"   Continuing with upload anyway...")
+          
+          client.data_modeling.instances.apply(nodes=[{
+              "instanceType": "node",
+              "space": "app-packages",
+              "externalId": external_id,
+              "sources": [{
+                  "source": {"type": "view", "space": "cdf_cdm", "externalId": "CogniteFile", "version": "v1"},
+                  "properties": {"name": zip_filename, "mimeType": "application/zip"}
+              }]
+          }])
+          
+          client.files.upload_content(
+              path=zip_file,
+              instance_id=NodeId(space="app-packages", external_id=external_id)
+          )
+          
+          print(f"✅ Published to {cdf_project}: {zip_filename}")
+          PYTHON_SCRIPT

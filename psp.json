@@ -1,6 +1,7 @@
 {
-    "name": "<Pattern name>",
-    "description": "<One or two sentences. Short description of the pattern>",
-    "type": "notebook",
-    "tags": ["tags", "noteboks", "mqtt"]
-  }
+  "name": "Platform Alpha",
+  "description": "Self-service CDF getting started: a synthetic offshore sample (SAP-style records, time series, and documents), Atlas agents that reason across it, and a Core Data Model extension deployed with the Toolkit.",
+  "type": "toolkit-module",
+  "tags": ["atlas", "sample-data", "data-modeling", "sap", "getting-started"],
+  "icon": "psp_icon.svg"
+}

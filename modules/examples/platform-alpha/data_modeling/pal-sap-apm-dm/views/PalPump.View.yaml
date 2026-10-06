@@ -1,0 +1,179 @@
+space: {{ schemaSpace }}
+externalId: PalPump
+name: Pal Pump
+description: Centrifugal pump equipment for Platform Alpha.
+implements:
+- space: cdf_cdm
+  externalId: CogniteEquipment
+  version: v1
+  type: view
+version: {{ datamodelVersion }}
+properties:
+  asset:
+    container:
+      space: cdf_cdm
+      externalId: CogniteEquipment
+      type: container
+    containerPropertyIdentifier: asset
+    name: Asset
+    description: The asset the equipment is related to.
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalFunctionalLocation
+      version: {{ datamodelVersion }}
+      type: view
+  equipmentType:
+    container:
+      space: cdf_cdm
+      externalId: CogniteEquipment
+      type: container
+    containerPropertyIdentifier: equipmentType
+    name: Equipment type
+    source:
+      space: cdf_cdm
+      externalId: CogniteEquipmentType
+      version: v1
+      type: view
+  manufacturer:
+    container:
+      space: cdf_cdm
+      externalId: CogniteEquipment
+      type: container
+    containerPropertyIdentifier: manufacturer
+    name: Manufacturer
+  serialNumber:
+    container:
+      space: cdf_cdm
+      externalId: CogniteEquipment
+      type: container
+    containerPropertyIdentifier: serialNumber
+    name: Serial number
+  sapEquipmentNumber:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+      type: container
+    containerPropertyIdentifier: sapEquipmentNumber
+    name: SAP equipment number
+  maintenancePlant:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+      type: container
+    containerPropertyIdentifier: maintenancePlant
+    name: Maintenance plant
+  workCenter:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+      type: container
+    containerPropertyIdentifier: workCenter
+    name: Work center
+  plannerGroup:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+      type: container
+    containerPropertyIdentifier: plannerGroup
+    name: Planner group
+  tag:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: tag
+    name: Tag
+  equipmentCategory:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: equipmentCategory
+    name: Equipment category
+  objectType:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: objectType
+    name: Object type
+  modelFamily:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: modelFamily
+    name: Model family
+  startupDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: startupDate
+    name: Startup date
+  ratedFlowM3h:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: ratedFlowM3h
+    name: Rated flow (m3/h)
+  ratedPowerKw:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: ratedPowerKw
+    name: Rated power (kW)
+  bearingArrangement:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: bearingArrangement
+    name: Bearing arrangement
+  dutyRole:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: dutyRole
+    name: Duty role
+  criticality:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: criticality
+    name: Criticality
+  servedByUnit:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      type: container
+    containerPropertyIdentifier: servedByUnit
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalLubeOilUnit
+      version: {{ datamodelVersion }}
+      type: view
+    name: Served by unit
+    description: Direct relation to the lube oil unit serving this pump.
+  servedBy:
+    connectionType: multi_edge_connection
+    type:
+      space: {{ schemaSpace }}
+      externalId: servedBy
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalLubeOilUnit
+      version: {{ datamodelVersion }}
+      type: view
+    direction: outwards
+    edgeSource:
+      space: {{ schemaSpace }}
+      externalId: PalServedBy
+      version: {{ datamodelVersion }}
+      type: view
+    name: Served by connections
+    description: Detailed served-by connections carrying the P&ID line number.

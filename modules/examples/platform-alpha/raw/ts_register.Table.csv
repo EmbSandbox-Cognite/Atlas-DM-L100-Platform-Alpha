@@ -1,0 +1,11 @@
+EXTERNAL_ID,TAG,EQUNR,UNIT,MEASUREMENT,DESCRIPTION
+pal_50-VT-101A-DE,50-PA-101A,10004711,mm/s,Vibration DE,Drive-end vibration RMS
+pal_50-VT-101A-NDE,50-PA-101A,10004711,mm/s,Vibration NDE,Non-drive-end vibration RMS
+pal_50-TT-101A-DE,50-PA-101A,10004711,C,Bearing temp DE,Drive-end bearing temperature
+pal_50-PT-101A-DIS,50-PA-101A,10004711,barg,Discharge pressure,Pump A discharge pressure
+pal_50-VT-101B-DE,50-PA-101B,10004712,mm/s,Vibration DE,Drive-end vibration RMS
+pal_50-VT-101B-NDE,50-PA-101B,10004712,mm/s,Vibration NDE,Non-drive-end vibration RMS
+pal_50-TT-101B-DE,50-PA-101B,10004712,C,Bearing temp DE,Drive-end bearing temperature
+pal_50-PT-101B-DIS,50-PA-101B,10004712,barg,Discharge pressure,Pump B discharge pressure
+pal_50-TT-105-OS,50-UZ-105,10004730,C,Oil supply temp,Lube oil supply temperature
+pal_50-LT-105,50-UZ-105,10004730,%,Reservoir level,Lube oil reservoir level

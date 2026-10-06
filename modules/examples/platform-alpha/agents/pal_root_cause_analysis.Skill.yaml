@@ -1,0 +1,78 @@
+externalId: pal_root_cause_analysis
+name: pal-root-cause-analysis
+description: Use this skill when the user asks why a Platform Alpha problem is happening, whether it has happened before, whether a fix or operating change such as switching duty is safe, or what action to take or notification to raise. Defines the root-cause method, common-cause checks, confidence grading, and the root-cause and draft-notification answer formats.
+content: |-
+  ---
+  name: pal-root-cause-analysis
+  description: Use this skill when the user asks why a Platform Alpha problem is happening, whether it has happened before, whether a fix or operating change such as switching duty is safe, or what action to take or notification to raise. Defines the root-cause method, common-cause checks, confidence grading, and the root-cause and draft-notification answer formats.
+  ---
+
+  # Platform Alpha root-cause method
+
+  Gather evidence with the tool sequences in the pal-asset-reasoning skill. This skill defines how to reason over that evidence and how to report it.
+  Every step must rest on retrieved evidence. If a step cannot be completed, say which evidence is missing.
+
+  ## Method
+
+  1. **Problem statement.** Name the equipment by tag, the symptom, the measured value with UTC timestamp and unit, and the applicable alarm and trip limits with their sources. If the user did not name a problem, find the most significant current abnormal condition and state that you assumed it.
+  2. **System scope.** Identify the supporting equipment for the affected item, such as lubrication, cooling, power and shared lines. Anything that supports more than one item is a common-cause candidate.
+  3. **Timeline.** Collect dated events for the affected item and for every item that shares support with it: notifications, orders, change records (MOC), inspection reports, oil analyses and trend changes. Sort oldest first.
+  4. **Causal levels.** Keep these distinct and never merge them:
+     - Symptom: what is observed or measured.
+     - Failure mode: how the component is failing.
+     - Mechanism: the physical process producing the failure mode.
+     - Root cause: the deepest condition that, if corrected, prevents recurrence.
+     - Contributing factors: conditions that allowed or worsened it, including recommendations or procedures that were not followed.
+  5. **Hypotheses.** List at least two credible hypotheses: at least one local to the affected item and at least one on shared supporting equipment. For each, record evidence for, evidence against, and missing evidence.
+  6. **Recurrence check.** Compare with prior failures on the same item and on every item that shares support with it. The same failure mode and mechanism on a sibling item is strong evidence of a common cause.
+  7. **Select the root cause.** Prefer the hypothesis that explains all observations with the fewest assumptions. A common cause that explains findings on more than one item outranks a local cause that explains only one.
+  8. **Test the proposed fix.** A fix or operating change is effective only if it removes or isolates the root cause. Moving duty to equipment exposed to the same root cause does not fix it; say so and explain why.
+  9. **Actions.** Separate corrective actions (fix the current condition) from preventive actions (stop recurrence). Target each action at the equipment where the root cause sits, which can differ from the equipment showing the symptom.
+
+  ## Confidence grading
+
+  Grade the selected root cause and every hypothesis:
+
+  - **Confirmed**: direct measured or documented evidence of the mechanism on this equipment, and no conflicting evidence.
+  - **Probable**: consistent evidence from two or more independent sources, such as SAP history, oil analysis and sensor trend, without direct confirmation.
+  - **Possible**: plausible and not ruled out, with only one supporting source.
+  - **Ruled out**: contradicted by evidence; name the evidence.
+
+  Plausibility alone never raises confidence. Missing evidence lowers it.
+
+  ## Root-cause answer format
+
+  Use these sections in this order. Keep the answer under about 350 words unless the user asks for more detail.
+
+  **Answer** - One or two sentences: the root cause, its confidence, and whether the proposed fix or operating change works.
+
+  **Problem** - Equipment tag, symptom, value with UTC timestamp and unit, alarm and trip limits with sources.
+
+  **Timeline** - Dated bullets, oldest first, limited to events in the causal chain.
+
+  **Hypotheses**
+
+  | Hypothesis | Evidence for | Evidence against | Confidence |
+  |---|---|---|---|
+
+  **Causal chain** - One line each: Symptom, Failure mode, Mechanism, Root cause. Then Contributing factors.
+
+  **Actions** - Corrective and Preventive, each with target equipment (tag and SAP equipment number when available) and the evidence that justifies it.
+
+  **Gaps** - Evidence that was missing or out of scope, and how it could change the conclusion.
+
+  For a pure recurrence question ("has this happened before?"), you may shorten this to Answer, Timeline, Causal chain and Gaps.
+
+  ## Draft notification format
+
+  Produce a draft only when the user asks, or as the last step of a root-cause answer. Label it **DRAFT - not created in SAP**.
+
+  - Notification type: M2 (malfunction report) for a failure or degraded condition; M1 (maintenance request) for planned work.
+  - Equipment: SAP equipment number and tag of the equipment where the root cause sits.
+  - Functional location: from the graph, when available.
+  - Priority: derived from criticality and how close the measured value is to the alarm and trip limits; state the reason.
+  - Short text: 40 characters or fewer.
+  - Damage: the failure mode in plain words.
+  - Cause: the mechanism and root cause in plain words.
+  - Long text: problem, evidence with citations, recommended corrective action.
+  - Basis: the documents, notifications, orders and time series used.

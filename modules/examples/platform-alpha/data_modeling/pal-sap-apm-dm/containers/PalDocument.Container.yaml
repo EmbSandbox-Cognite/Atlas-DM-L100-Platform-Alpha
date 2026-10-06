@@ -1,0 +1,88 @@
+space: {{ schemaSpace }}
+externalId: PalDocument
+usedFor: node
+name: Pal Document
+description: Engineering document metadata (number, type, revision, status, applicability) and appliesTo equipment links.
+properties:
+  documentNumber:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  documentType:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  revision:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  documentStatus:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  issueDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  authority:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  applicability:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  discipline:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  appliesTo:
+    type:
+      type: direct
+      list: true
+    nullable: true
+    immutable: false
+    autoIncrement: false
+constraints:
+  requiredFile:
+    constraintType: requires
+    require:
+      type: container
+      space: cdf_cdm
+      externalId: CogniteFile
+indexes:
+  appliesTo:
+    indexType: btree
+    properties:
+      - appliesTo

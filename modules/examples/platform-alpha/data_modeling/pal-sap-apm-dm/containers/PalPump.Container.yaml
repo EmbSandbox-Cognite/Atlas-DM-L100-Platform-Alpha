@@ -1,0 +1,102 @@
+space: {{ schemaSpace }}
+externalId: PalPump
+usedFor: node
+name: Pal Pump
+description: Centrifugal pump attributes (tag, rated flow and power, bearing arrangement, duty role, criticality, served-by unit).
+properties:
+  tag:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  equipmentCategory:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  objectType:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  modelFamily:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  startupDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  ratedFlowM3h:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  ratedPowerKw:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  bearingArrangement:
+    type:
+      type: int32
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  dutyRole:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  criticality:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  servedByUnit:
+    type:
+      type: direct
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+constraints:
+  requiredSapEquipment:
+    constraintType: requires
+    require:
+      type: container
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+indexes:
+  servedByUnit:
+    indexType: btree
+    properties:
+      - servedByUnit
+    cursorable: true

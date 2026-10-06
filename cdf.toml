@@ -1,0 +1,25 @@
+[cdf]
+default_organization_dir = ""
+default_config_yaml = "config.dev.yaml"
+
+[alpha_flags] 
+external-libraries = true
+agents = true
+agent-skills = true
+
+[modules]
+# This is the version of the modules. It should not be changed manually.
+# It will be updated by the 'cdf modules upgrade' command.
+version = "0.8.219"
+
+
+[plugins]
+run = true
+data = true
+pull = false
+dump = true
+dev = true
+
+[library.cognite]
+url = "https://github.com/cognitedata/library/releases/download/latest/packages.zip"
+checksum = "sha256:0d62ea48f11b066869bd6bd084378c5d6aaaf37046797318d2e44081efb46529"

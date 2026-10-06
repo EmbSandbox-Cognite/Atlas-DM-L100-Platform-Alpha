@@ -1,0 +1,15 @@
+externalId: tr_pal_a_equipment_types
+name: Platform Alpha Pass A - CogniteEquipmentType
+destination:
+  type: nodes
+  view:
+    space: cdf_cdm
+    externalId: CogniteEquipmentType
+    version: v1
+  instanceSpace: {{ instanceSpace }}
+ignoreNullFields: true
+isPublic: true
+conflictMode: upsert
+authentication:
+  clientId: ${IDP_CLIENT_ID}
+  clientSecret: ${IDP_CLIENT_SECRET}

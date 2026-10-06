@@ -1,0 +1,15 @@
+externalId: tr_pal_b_pump_asset
+name: Platform Alpha Pass B - PalPump
+destination:
+  type: nodes
+  view:
+    space: {{ schemaSpace }}
+    externalId: PalPump
+    version: {{ datamodelVersion }}
+  instanceSpace: {{ instanceSpace }}
+ignoreNullFields: true
+isPublic: true
+conflictMode: upsert
+authentication:
+  clientId: ${IDP_CLIENT_ID}
+  clientSecret: ${IDP_CLIENT_SECRET}

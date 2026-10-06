@@ -1,0 +1,90 @@
+space: {{ schemaSpace }}
+externalId: PalNotification
+usedFor: node
+name: Pal Notification
+description: SAP maintenance notification attributes (type, priority, text, dates, breakdown indicator, status).
+properties:
+  notificationNumber:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  notificationType:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  priority:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  shortText:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  longText:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  createdDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  requiredStartDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  requiredEndDate:
+    type:
+      type: timestamp
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  breakdownIndicator:
+    type:
+      type: boolean
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  status:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+constraints:
+  requiredActivity:
+    constraintType: requires
+    require:
+      type: container
+      space: cdf_cdm
+      externalId: CogniteActivity
+indexes: {}

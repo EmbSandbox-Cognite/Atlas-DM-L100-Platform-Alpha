@@ -1,0 +1,19 @@
+environment:
+  name: pal
+  project: sandbox-sap-dev
+  validation-type: dev
+  selected:
+    - modules/examples/platform-alpha
+
+variables:
+  modules:
+    examples:
+      platform-alpha:
+        schemaSpace: sp_pal_schema
+        instanceSpace: sp_pal_instances
+        functionSpace: sp_pal_functions
+        rawSourceDatabase: pal_source
+        datamodelVersion: v1
+        workflow: wf_pal_ingestion
+        functionClientId: ${IDP_CLIENT_ID}
+        functionClientSecret: ${IDP_CLIENT_SECRET}

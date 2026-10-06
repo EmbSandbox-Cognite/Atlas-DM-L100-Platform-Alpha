@@ -1,0 +1,46 @@
+space: {{ schemaSpace }}
+externalId: PalSapEquipment
+usedFor: node
+name: Pal SAP Equipment
+description: Shared SAP equipment attributes (equipment number, maintenance plant, work center, planner group).
+properties:
+  sapEquipmentNumber:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  maintenancePlant:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  workCenter:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  plannerGroup:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+constraints:
+  requiredEquipment:
+    constraintType: requires
+    require:
+      type: container
+      space: cdf_cdm
+      externalId: CogniteEquipment
+indexes: {}

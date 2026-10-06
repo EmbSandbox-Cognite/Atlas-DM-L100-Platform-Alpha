@@ -1,0 +1,15 @@
+externalId: tr_pal_b_notif_equipment
+name: Platform Alpha Pass B - PalNotification
+destination:
+  type: nodes
+  view:
+    space: {{ schemaSpace }}
+    externalId: PalNotification
+    version: {{ datamodelVersion }}
+  instanceSpace: {{ instanceSpace }}
+ignoreNullFields: true
+isPublic: true
+conflictMode: upsert
+authentication:
+  clientId: ${IDP_CLIENT_ID}
+  clientSecret: ${IDP_CLIENT_SECRET}

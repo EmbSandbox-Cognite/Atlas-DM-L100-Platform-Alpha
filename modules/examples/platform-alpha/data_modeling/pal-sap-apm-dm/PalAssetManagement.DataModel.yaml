@@ -1,0 +1,50 @@
+space: {{ schemaSpace }}
+externalId: PalAssetManagement
+name: Platform Alpha Asset Management
+description: Platform Alpha demo asset management data model
+version: {{ datamodelVersion }}
+views:
+- space: {{ schemaSpace }}
+  externalId: PalFunctionalLocation
+  version: {{ datamodelVersion }}
+  type: view
+- space: {{ schemaSpace }}
+  externalId: PalPump
+  version: {{ datamodelVersion }}
+  type: view
+- space: {{ schemaSpace }}
+  externalId: PalLubeOilUnit
+  version: {{ datamodelVersion }}
+  type: view
+- space: {{ schemaSpace }}
+  externalId: PalNotification
+  version: {{ datamodelVersion }}
+  type: view
+- space: {{ schemaSpace }}
+  externalId: PalMaintenanceOrder
+  version: {{ datamodelVersion }}
+  type: view
+- space: {{ schemaSpace }}
+  externalId: PalDocument
+  version: {{ datamodelVersion }}
+  type: view
+- space: {{ schemaSpace }}
+  externalId: PalServedBy
+  version: {{ datamodelVersion }}
+  type: view
+- space: cdf_cdm
+  externalId: CogniteAssetClass
+  version: v1
+  type: view
+- space: cdf_cdm
+  externalId: CogniteEquipmentType
+  version: v1
+  type: view
+- space: cdf_cdm
+  externalId: CogniteTimeSeries
+  version: v1
+  type: view
+- space: cdf_cdm
+  externalId: CogniteUnit
+  version: v1
+  type: view

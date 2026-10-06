@@ -1,0 +1,76 @@
+# ---------------------------
+# Python files
+# ---------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+build_info.dev.yaml
+build_info.prod.yaml
+deploy_logs_*/
+
+
+# ---------------------------
+# Virtual environments
+# ---------------------------
+venv/
+env/
+.venv/
+
+# ---------------------------
+# Environment / secrets
+# ---------------------------
+# any environment files
+.env*
+*.env
+
+# ---------------------------
+# Jupyter / IPython
+# ---------------------------
+.ipynb_checkpoints/
+
+# ---------------------------
+# VS Code
+# ---------------------------
+.vscode/
+.history/
+
+# ---------------------------
+# OS files
+# ---------------------------
+.DS_Store
+Thumbs.db
+
+# ---------------------------
+# Certificates / Keys
+# ---------------------------
+*.pem
+*.key
+
+toolkit-test.env
+
+# repo and other dev files
+temp-repo/
+SPEC.*
+SPEC.md
+TRAINER_GUIDE.md
+_*
+documents 
+RUNBOOK.md
+
+
+#cdf-toolkit files
+deploy_logs_*/
+.dev.yaml
+.prod.yaml
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+build

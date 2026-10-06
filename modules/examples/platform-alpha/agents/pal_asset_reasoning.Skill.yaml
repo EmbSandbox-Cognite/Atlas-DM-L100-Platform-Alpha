@@ -1,0 +1,97 @@
+externalId: pal_asset_reasoning
+name: pal-asset-reasoning
+description: Use this skill for any question about Platform Alpha equipment (P-101A, P-101B, U-105), their connections, maintenance notifications and orders, engineering documents, vibration or alarm and trip limits, sensor values and trends, or lube oil condition. Provides vocabulary, data model fields and tool sequences.
+content: |-
+  ---
+  name: pal-asset-reasoning
+  description: Use this skill for any question about Platform Alpha equipment (P-101A, P-101B, U-105), their connections, maintenance notifications and orders, engineering documents, vibration or alarm and trip limits, sensor values and trends, or lube oil condition. Provides vocabulary, data model fields and tool sequences.
+  ---
+
+  # Platform Alpha evidence workflow
+
+  Use tools for every factual answer. Do not answer from this skill as if it were evidence.
+  If a property or relationship is unavailable in the agent's configured data model, say so and use only evidence that is actually available.
+
+  ## Vocabulary
+
+  - P-101A = tag `50-PA-101A`, the duty seawater lift pump.
+  - P-101B = tag `50-PA-101B`, the standby seawater lift pump.
+  - U-105 = tag `50-UZ-105`, the shared lube oil unit.
+  - "Current" means the newest relevant evidence at or before the latest available timestamp; do not use future data.
+  - "Alarm" and "trip" are different thresholds. Never substitute one for the other.
+
+  ## Data model guidance
+
+  When the configured graph exposes the Platform Alpha views:
+
+  - `PalPump`: use `tag`, `bearingArrangement`, `dutyRole`, `criticality`, `servedByUnit`, and `servedBy`.
+    `servedByUnit` is the fast direct relation to the lube oil unit.
+    `servedBy` is the detailed edge connection; its `PalServedBy.lineNumber` identifies the P&ID line.
+  - `PalLubeOilUnit`: use `oilGrade`, `reservoirVolumeL`, and reverse relation `serves`.
+  - `PalNotification`: use notification number, status, priority, damage/cause fields, reported date, and linked equipment.
+  - `PalMaintenanceOrder`: use order number, status, dates, linked equipment and notification, operation text, and material.
+  - `PalDocument`: use `documentNumber`, `revision`, `documentType`, `documentStatus`, `issueDate`, `authority`, `applicability`, and `appliesTo`.
+  - `CogniteTimeSeries`: first find series linked to equipment, then retrieve datapoints with the time-series tool.
+
+  When only CogniteCore views are configured, use only base equipment, activity, file, and time-series fields. Do not invent custom metadata or relationships.
+
+  ## Tool sequence
+
+  ### Connectivity questions
+
+  1. Query the knowledge graph for the requested pump or pumps.
+  2. Follow the direct `servedByUnit` relation when available.
+  3. Follow `servedBy` when line numbers are requested.
+  4. Confirm both endpoints by tag before answering.
+  5. If graph relationships are unavailable, locate the applicable current P&ID and ask the document tool.
+
+  ### Limits and engineering-document questions
+
+  1. Query the equipment and read configuration fields such as `bearingArrangement`.
+  2. Query document metadata and retain documents whose `appliesTo` includes the equipment.
+  3. Prefer `documentStatus = Current` over Superseded.
+  4. Apply authority and specificity:
+     - company procedure governs the operating alarm when it is more conservative;
+     - the current OEM manual governs the OEM trip threshold;
+     - select the OEM row matching the equipment's bearing arrangement.
+  5. Ask the document tool only after selecting the relevant documents.
+  6. Report alarm and trip separately with document number and revision. Explain conflicts instead of silently choosing.
+
+  ### Maintenance-history questions
+
+  1. Query notifications and orders linked to the equipment.
+  2. Follow notification-to-order and equipment relationships.
+  3. Read an applicable MOC or inspection document only when needed to explain the change or recommendation.
+  4. Keep event dates, failure mode, cause, repair, and recommendation distinct.
+
+  ### Oil-condition questions
+
+  1. Identify the lube oil unit in the graph.
+  2. Select the latest applicable oil-analysis document by `issueDate`, not filename order.
+  3. Ask the latest report for measured values.
+  4. Ask the current lube-unit manual for target/action limits.
+  5. Query open notifications linked to the lube unit.
+  6. Find the reservoir-level time series and retrieve the relevant trend.
+  7. State each measured value, limit, document number, revision, and date.
+
+  Why, recurrence, safe-fix and what-to-do questions follow the pal-root-cause-analysis skill, which uses the sequences above to gather evidence.
+
+  ## Time-series rules
+
+  - Resolve the time series from the graph before retrieving datapoints.
+  - Use explicit time windows and dates in the answer.
+  - For "current", use the latest datapoint.
+  - For a trend, compare representative windows; do not infer a trend from one point.
+  - Do not extrapolate beyond available data unless the user asks for a projection. Label projections and state the method.
+
+  ## Quality checks
+
+  Before answering, verify:
+
+  - tags and external IDs refer to the intended equipment;
+  - relation direction is correct;
+  - document status, revision, applicability, and authority were checked;
+  - alarm is not confused with trip;
+  - the latest report was selected by date;
+  - time-series values include timestamps and units;
+  - every conclusion is supported by retrieved evidence.

@@ -1,0 +1,5 @@
+QMNUM,QMART,QMTXT,EQUNR,TPLNR,PRIOK,QMDAT,OTEIL,FECOD,URCOD,STAT
+200045123,M2,"High DE vibration and bearing noise, pump tripped",10004712,PAL-M20-50-P101B,1,2026-01-19,DE bearing,BRG-WEAR,LUB-CONT,Closed
+200047010,M1,Quarterly vibration route — readings normal,10004711,PAL-M20-50-P101A,4,2026-03-04,,,,Closed
+200048877,M1,"Oil level high in reservoir, drained 15 L",10004730,PAL-M20-50-U105,3,2026-08-20,Reservoir,LVL-HIGH,,Closed
+200049301,M1,"Milky oil in sight glass, see IR-2026-0828",10004730,PAL-M20-50-U105,3,2026-08-28,Oil,OIL-APPR,,Open

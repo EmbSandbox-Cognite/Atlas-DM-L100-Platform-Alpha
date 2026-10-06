@@ -1,0 +1,3 @@
+space: {{ schemaSpace }}
+name: Platform Alpha Schema Space
+description: Schema space for PalAssetManagement data model

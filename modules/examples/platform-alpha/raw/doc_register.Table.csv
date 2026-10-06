@@ -1,0 +1,11 @@
+DOC_NO,TITLE,DOC_TYPE,REV,STATUS,ISSUE_DATE,AUTHORITY,APPLICABILITY,DISCIPLINE,APPLIES_TO_TAGS,FILE_NAME
+FS-MARK3-IOM,"Mark 3 ISO Installation, Operation & Maintenance Manual",VendorManual,B,Superseded,2021-03-15,Vendor,Mark 3 ISO,Mechanical,50-PA-101A;50-PA-101B,FS-MARK3-IOM_RevB.pdf
+FS-MARK3-IOM,"Mark 3 ISO Installation, Operation & Maintenance Manual",VendorManual,C,Current,2025-11-10,Vendor,Mark 3 ISO,Mechanical,50-PA-101A;50-PA-101B,FS-MARK3-IOM_RevC.pdf
+PAL-50-DS-0101,Datasheet — Seawater lift pumps 50-PA-101A/B,Datasheet,0,Current,2021-06-01,Vendor,50-PA-101A/B,Mechanical,50-PA-101A;50-PA-101B,PAL-50-DS-0101_Rev0.pdf
+PAL-TR-CM-001,Vibration Monitoring of Rotating Equipment,CompanyProcedure,4,Current,2024-09-01,Company,Rotating >300 kW,Condition monitoring,50-PA-101A;50-PA-101B,PAL-TR-CM-001_Rev4.pdf
+KLS-KLU60-OM,KLU-60 Lube Oil Unit Operation & Maintenance,VendorManual,A,Current,2020-10-05,Vendor,KLU-60,Mechanical,50-UZ-105,KLS-KLU60-OM_RevA.pdf
+MOC-2026-014,"Bearing arrangement upgrade, seawater lift pumps",MOC,1,Current,2026-01-28,Company,50-PA-101A/B,Mechanical,50-PA-101A;50-PA-101B,MOC-2026-014_Rev1.pdf
+OA-2026-0415,Oil Analysis Report — U-105,OilAnalysisReport,0,ForInformation,2026-04-18,Operations,50-UZ-105,Lubrication,50-UZ-105,OA-2026-0415_Rev0.pdf
+OA-2026-0908,Oil Analysis Report — U-105,OilAnalysisReport,0,ForInformation,2026-09-11,Operations,50-UZ-105,Lubrication,50-UZ-105,OA-2026-0908_Rev0.pdf
+IR-2026-0828,Inspection Report — Lube Oil Unit U-105,InspectionReport,0,ForInformation,2026-08-28,Operations,50-UZ-105,Inspection,50-UZ-105,IR-2026-0828_Rev0.pdf
+PAL-50-PID-0001,P&ID — Seawater Lift Pumps and Lube Oil System,PID,2,Current,2025-05-12,Company,System 50,Process,50-PA-101A;50-PA-101B;50-UZ-105,PAL-50-PID-0001_Rev2.pdf

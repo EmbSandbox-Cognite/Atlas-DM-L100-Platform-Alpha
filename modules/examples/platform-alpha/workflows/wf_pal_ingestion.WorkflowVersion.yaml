@@ -1,0 +1,203 @@
+workflowExternalId: {{ workflow }}
+version: 'v1'
+workflowDefinition:
+  tasks:
+    - externalId: tr_pal_a_asset_classes
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_asset_classes
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_a_equipment_types
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_equipment_types
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_a_fl
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_fl
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_a_pumps
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_pumps
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_a_lube
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_lube
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_a_notifications
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_notifications
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_a_orders
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_orders
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_a_documents
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_documents
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_a_timeseries
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_a_timeseries
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+    - externalId: tr_pal_b_fl_parent
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_fl_parent
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_fl
+    - externalId: tr_pal_b_fl_assetclass
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_fl_assetclass
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_fl
+        - externalId: tr_pal_a_asset_classes
+    - externalId: tr_pal_b_pump_asset
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_pump_asset
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_fl
+        - externalId: tr_pal_a_pumps
+        - externalId: tr_pal_a_equipment_types
+    - externalId: tr_pal_b_lube_asset
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_lube_asset
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_fl
+        - externalId: tr_pal_a_lube
+        - externalId: tr_pal_a_equipment_types
+    - externalId: tr_pal_b_notif_equipment
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_notif_equipment
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_pumps
+        - externalId: tr_pal_a_lube
+        - externalId: tr_pal_a_notifications
+    - externalId: tr_pal_b_mo_notification
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_mo_notification
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_orders
+        - externalId: tr_pal_a_notifications
+    - externalId: tr_pal_b_mo_equipment
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_mo_equipment
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_orders
+        - externalId: tr_pal_a_pumps
+        - externalId: tr_pal_a_lube
+    - externalId: tr_pal_b_doc_equipment
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_doc_equipment
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_documents
+        - externalId: tr_pal_a_pumps
+        - externalId: tr_pal_a_lube
+    - externalId: tr_pal_b_ts_equipment
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_ts_equipment
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_timeseries
+        - externalId: tr_pal_a_pumps
+        - externalId: tr_pal_a_lube
+    - externalId: tr_pal_b_served_by
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_served_by
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_pumps
+        - externalId: tr_pal_a_lube
+    - externalId: tr_pal_b_pump_served_by
+      type: transformation
+      parameters:
+        transformation:
+          externalId: tr_pal_b_pump_served_by
+          concurrencyPolicy: fail
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_a_pumps
+        - externalId: tr_pal_a_lube
+    - externalId: fn_pal_ts_generator_run
+      type: "function"
+      parameters:
+        function:
+          externalId: fn_pal_ts_generator
+          data: {}
+        isAsyncComplete: false
+      name: Generate Platform Alpha time series datapoints
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: tr_pal_b_fl_parent
+        - externalId: tr_pal_b_fl_assetclass
+        - externalId: tr_pal_b_pump_asset
+        - externalId: tr_pal_b_lube_asset
+        - externalId: tr_pal_b_notif_equipment
+        - externalId: tr_pal_b_mo_notification
+        - externalId: tr_pal_b_mo_equipment
+        - externalId: tr_pal_b_doc_equipment
+        - externalId: tr_pal_b_ts_equipment
+        - externalId: tr_pal_b_served_by
+        - externalId: tr_pal_b_pump_served_by

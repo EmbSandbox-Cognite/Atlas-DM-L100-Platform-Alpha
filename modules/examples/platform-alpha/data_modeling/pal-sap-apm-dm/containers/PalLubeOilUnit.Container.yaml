@@ -1,0 +1,29 @@
+space: {{ schemaSpace }}
+externalId: PalLubeOilUnit
+usedFor: node
+name: Pal Lube Oil Unit
+description: Lube oil unit attributes (oil grade, reservoir volume).
+properties:
+  oilGrade:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+  reservoirVolumeL:
+    type:
+      type: float64
+      list: false
+    nullable: true
+    immutable: false
+    autoIncrement: false
+constraints:
+  requiredSapEquipment:
+    constraintType: requires
+    require:
+      type: container
+      space: {{ schemaSpace }}
+      externalId: PalSapEquipment
+indexes: {}

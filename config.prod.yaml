@@ -1,0 +1,245 @@
+environment:
+  name: prod
+  project: <my-project-prod>
+  validation-type: prod
+  selected:
+    # ============================================================
+    # QUICKSTART MODULES (Demo content - Springfield example)
+    # ============================================================
+    - modules/quickstart/cdf_common
+    - modules/quickstart/cdf_ingestion
+    - modules/quickstart/contextualization/cdf_connection_sql
+    - modules/quickstart/contextualization/cdf_file_annotation
+    - modules/quickstart/industrial_tools/cdf_search
+    - modules/quickstart/models/cdf_process_industry_extension
+    - modules/quickstart/open_industrial_data_sync
+    - modules/quickstart/rpt_quality
+    - modules/quickstart/sourcesystem/cdf_pi
+    - modules/quickstart/sourcesystem/cdf_sap_assets
+    - modules/quickstart/sourcesystem/cdf_sap_events
+    - modules/quickstart/sourcesystem/cdf_sharepoint
+
+    # ============================================================
+    # WORKSPACE MODULES (Your project - configure before enabling)
+    # Replace <placeholders> in the workspace configuration below,
+    # then uncomment the modules you want to deploy.
+    # ============================================================
+    # - modules/workspace/cdf_common
+    # - modules/workspace/models/cdf_process_industry_extension
+    # - modules/workspace/models/test_data_model
+    # - modules/workspace/cdf_ingestion
+    # - modules/workspace/contextualization/cdf_file_annotation
+    # - modules/workspace/industrial_tools/cdf_search
+    # - modules/workspace/sourcesystem/_template
+
+variables:
+  modules:
+    # ============================================================
+    # QUICKSTART CONFIGURATION (mirrors modules/quickstart/ structure)
+    # ============================================================
+    quickstart:
+      org_prefix: qs
+      org_prefix_cap: Qs
+      datamodelVersion: v1.0
+      schemaSpace: qs_process_industry_schema
+      functionClientId: ${IDP_CLIENT_ID}
+      functionClientSecret: ${IDP_CLIENT_SECRET}
+      workflow_timeout_per_job: 3600
+      dataset: qs_ingestion
+      instanceSpace: qs_springfield_instances
+      functionSpace: qs_springfield_functions
+      rawSourceDatabase: qs_ingestion
+      rawStateDatabase: qs_contextualization_state
+      annotationSpace: qs_springfield_instances
+      assetTransformationExternalId: qs_sap_assets_springfield_s4hana
+      equipmentTransformationExternalId: qs_sap_equipment_springfield_s4hana
+      equipmentToAssetTransformationExternalId: qs_sap_equipment_to_asset_springfield_s4hana
+      timeseriesTransformationExternalId: qs_pi_timeseries_springfield_aveva_pi
+      timeseriesLinkTransformationExternalId: qs_pi_timeseries_link_springfield_aveva_pi
+      maintenanceOrderTransformationExternalId: qs_sap_maintenance_orders_springfield_s4hana
+      operationTransformationExternalId: qs_sap_operations_springfield_s4hana
+      operationToMaintenanceOrderTransformationExternalId: qs_sap_operation_to_maintenance_order_springfield_s4hana
+      fileTransformationExternalId: qs_files_metadata_springfield
+      maintenanceOrderToAssetTransformationExternalId: qs_maintenance_order_to_asset
+      operationToAssetTransformationExternalId: qs_operation_to_asset
+      activityToTimeSeriesTransformationExternalId: qs_activity_to_timeseries
+      timeSeriesToAssetTransformationExternalId: qs_timeseries_to_asset
+      timeSeriesToEquipmentTransformationExternalId: qs_timeseries_to_equipment
+
+      cdf_common:
+        schemaSpace: cdf_cdm
+        rawStateTable: qs_diagram_parsing
+
+      cdf_ingestion:
+        workflow: qs_ingestion
+        groupSourceId: b1fb4665-b811-477d-a840-fe45b2319c90
+        ingestionClientId: ${INGESTION_CLIENT_ID}
+        ingestionClientSecret: ${INGESTION_CLIENT_SECRET}
+        schemaSpace: qs_process_industry_schema
+        schemaSpace2: cdf_cdm
+        schemaSpace3: cdf_idm
+        instanceSpaces:
+          - qs_springfield_instances
+          - cdf_cdm_units
+        runWorkflowUserIds:
+          - your_user_id_here
+        runWorkflowSchedule: "0 0 29 2 *"
+
+      contextualization:
+        cdf_file_annotation:
+          annotationDatasetExternalId: qs_file_annotation
+          functionSpace: qs_springfield_functions
+          annotationStateExternalId: QuickStartFileAnnotationState
+          annotationStateSchemaSpace: qs_hdm
+          annotationStateVersion: v1.0.0
+          patternModeInstanceSpace: qs_pattern_mode_results
+          patternDetectSink: qs_pattern_detection_sink_node
+          fileSchemaSpace: qs_process_industry_schema
+          fileInstanceSpace: qs_springfield_instances
+          fileExternalId: QsFile
+          fileVersion: v1.0
+          rawDb: qs_file_annotation
+          rawTableDocTag: annotation_documents_tags
+          rawTableDocDoc: annotation_documents_docs
+          rawTableDocPattern: annotation_documents_patterns
+          rawTableCache: annotation_entities_cache
+          rawManualPatternsCatalog: manual_patterns_catalog
+          rawTablePromoteCache: annotation_tags_cache
+          extractionPipelineExternalId: qs_ep_file_annotation
+          targetEntitySchemaSpace: qs_process_industry_schema
+          targetEntityInstanceSpace: qs_springfield_instances
+          targetEntityExternalId: QuickStartAsset
+          targetEntityVersion: v1.0
+          functionClientId: ${IDP_CLIENT_ID}
+          functionClientSecret: ${IDP_CLIENT_SECRET}
+          prepareFunctionExternalId: qs_fn_file_annotation_prepare
+          prepareFunctionVersion: v1.0.0
+          launchFunctionExternalId: qs_fn_file_annotation_launch
+          launchFunctionVersion: v1.0.0
+          finalizeFunctionExternalId: qs_fn_file_annotation_finalize
+          finalizeFunctionVersion: v1.0.0
+          promoteFunctionExternalId: qs_fn_file_annotation_promote
+          promoteFunctionVersion: v1.0.0
+          workflowExternalId: qs_file_annotation
+          workflowSchedule: "0 0 29 2 *"
+          groupSourceId: ${TOOLKIT_GROUP_ID}
+
+        cdf_connection_sql:
+          schemaSpace: qs_process_industry_schema
+
+      industrial_tools:
+        cdf_search:
+          schemaSpace: qs_process_industry_schema
+          location: qs_springfield
+          locationName: QuickStart Springfield
+
+      models:
+        cdf_process_industry_extension:
+          schemaSpace: qs_process_industry_schema
+
+      open_industrial_data_sync:
+        openIdClientSecret: ${OPEN_ID_CLIENT_SECRET}
+        oidDatasetExternalId: qs_ds_oid_sync
+        instanceSpace: qs_springfield_instances
+        groupSourceId: ${TOOLKIT_GROUP_ID}
+        functionClientId: ${IDP_CLIENT_ID}
+        functionClientSecret: ${IDP_CLIENT_SECRET}
+        extractionPipelineExternalId: qs_ep_oid_sync
+        functionExternalId: qs_fn_oid_sync
+        scheduleExternalId: qs_schedule_oid_sync
+        scheduleCronExpression: "*/10 * * * *"
+
+      rpt_quality:
+        annotation_db: qs_file_annotation
+        annotation_patterns_tbl: annotation_documents_patterns
+        annotation_docs_tbl: annotation_documents_docs
+        annotation_tags_tbl: annotation_documents_tags
+        contextualization_rate_workflow: "0 0 29 2 *"
+
+      sourcesystem:
+        cdf_pi:
+          sourceName: Springfield AVEVA PI
+          sourceId: qs_springfield_aveva_pi
+          schemaSpace: qs_process_industry_schema
+          openIdFeederExternalId: qs_fn_open_id_feeder
+          openIdFeederFunctionVersion: v1.0.0
+          openIdFeederSchedule: "0 0 29 2 *"
+
+        cdf_sap_assets:
+          sourceName: QuickStart SAP Springfield S/4HANA Assets
+          sourceId: qs_sap_springfield_s4hana_assets
+          schemaSpace: qs_process_industry_schema
+
+        cdf_sap_events:
+          sourceName: QuickStart SAP Springfield S/4HANA Activities
+          sourceId: qs_sap_springfield_s4hana_activities
+          schemaSpace: qs_process_industry_schema
+
+        cdf_sharepoint:
+          sourceName: QuickStart Springfield Sharepoint
+          sourceId: qs_springfield_sharepoint
+          schemaSpace: qs_process_industry_schema
+
+    # ============================================================
+    # WORKSPACE CONFIGURATION (Your Project)
+    # IMPORTANT: Replace ALL <placeholders> below before uncommenting
+    # workspace modules above. The build will fail if placeholders remain.
+    # ============================================================
+    workspace:
+      org_prefix: <your_prefix>           # e.g., "acme" → acme_instances, acme_schema (lowercase, no spaces)
+      org_prefix_cap: <YourOrg>           # e.g., "Acme" → AcmeAsset, AcmeProcessIndustries (PascalCase)
+      schemaSpace: <your_prefix>_schema
+      instanceSpace: <your_prefix>_instances
+      functionSpace: <your_prefix>_functions
+      dataset: <your_prefix>_ingestion
+      datamodelVersion: v1.0
+      rawSourceDatabase: <your_prefix>_ingestion
+      rawStateDatabase: <your_prefix>_contextualization_state
+
+      cdf_ingestion:
+        workflow: <your_prefix>_ingestion
+        rootAssetTransformation: tr_<your_prefix>_root_asset
+
+      contextualization:
+        cdf_file_annotation:
+          annotationDatasetExternalId: <your_prefix>_file_annotation
+          functionSpace: <your_prefix>_functions
+          annotationStateExternalId: <YourOrg>FileAnnotationState
+          annotationStateSchemaSpace: <your_prefix>_hdm
+          annotationStateVersion: v1.0.0
+          patternModeInstanceSpace: <your_prefix>_pattern_mode_results
+          patternDetectSink: <your_prefix>_pattern_detection_sink_node
+          fileSchemaSpace: <your_prefix>_schema
+          fileInstanceSpace: <your_prefix>_instances
+          fileExternalId: <YourOrg>File
+          fileVersion: v1.0
+          rawDb: <your_prefix>_file_annotation
+          rawTableDocTag: annotation_documents_tags
+          rawTableDocDoc: annotation_documents_docs
+          rawTableDocPattern: annotation_documents_patterns
+          rawTableCache: annotation_entities_cache
+          rawManualPatternsCatalog: manual_patterns_catalog
+          rawTablePromoteCache: annotation_tags_cache
+          extractionPipelineExternalId: <your_prefix>_ep_file_annotation
+          targetEntitySchemaSpace: <your_prefix>_schema
+          targetEntityInstanceSpace: <your_prefix>_instances
+          targetEntityExternalId: <YourOrg>Asset
+          targetEntityVersion: v1.0
+          functionClientId: ${IDP_CLIENT_ID}
+          functionClientSecret: ${IDP_CLIENT_SECRET}
+          prepareFunctionExternalId: <your_prefix>_fn_file_annotation_prepare
+          prepareFunctionVersion: v1.0.0
+          launchFunctionExternalId: <your_prefix>_fn_file_annotation_launch
+          launchFunctionVersion: v1.0.0
+          finalizeFunctionExternalId: <your_prefix>_fn_file_annotation_finalize
+          finalizeFunctionVersion: v1.0.0
+          promoteFunctionExternalId: <your_prefix>_fn_file_annotation_promote
+          promoteFunctionVersion: v1.0.0
+          workflowExternalId: <your_prefix>_file_annotation
+          workflowSchedule: "0 0 29 2 *"
+          groupSourceId: <your_entra_group_id>
+
+      industrial_tools:
+        cdf_search:
+          location: <your_location_id>    # e.g., "houston" (lowercase, no spaces)
+          locationName: <Your Location>   # e.g., "Houston Plant"

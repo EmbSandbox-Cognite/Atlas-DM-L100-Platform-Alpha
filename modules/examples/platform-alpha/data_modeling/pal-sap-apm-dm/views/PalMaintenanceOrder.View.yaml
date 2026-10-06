@@ -1,0 +1,107 @@
+space: {{ schemaSpace }}
+externalId: PalMaintenanceOrder
+name: Pal Maintenance Order
+description: SAP maintenance order mapped to CogniteActivity.
+implements:
+- space: cdf_cdm
+  externalId: CogniteActivity
+  version: v1
+  type: view
+version: {{ datamodelVersion }}
+properties:
+  equipment:
+    container:
+      space: cdf_cdm
+      externalId: CogniteActivity
+      type: container
+    containerPropertyIdentifier: equipment
+    name: Equipment
+    description: Equipment related to the maintenance order.
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      version: {{ datamodelVersion }}
+      type: view
+  notification:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: notification
+    name: Notification
+    description: Source notification for the maintenance order.
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      version: {{ datamodelVersion }}
+      type: view
+  orderNumber:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: orderNumber
+    name: Order number
+  orderType:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: orderType
+    name: Order type
+  priority:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: priority
+    name: Priority
+  shortText:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: shortText
+    name: Short text
+  status:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: status
+    name: Status
+  plannedStartDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: plannedStartDate
+    name: Planned start date
+  plannedEndDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: plannedEndDate
+    name: Planned end date
+  basicStartDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: basicStartDate
+    name: Basic start date
+  basicEndDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: basicEndDate
+    name: Basic end date
+  mainWorkCenter:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalMaintenanceOrder
+      type: container
+    containerPropertyIdentifier: mainWorkCenter
+    name: Main work center

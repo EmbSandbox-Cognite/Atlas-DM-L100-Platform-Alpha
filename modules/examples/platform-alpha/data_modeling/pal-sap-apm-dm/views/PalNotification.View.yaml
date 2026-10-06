@@ -1,0 +1,94 @@
+space: {{ schemaSpace }}
+externalId: PalNotification
+name: Pal Notification
+description: SAP maintenance notification mapped to CogniteActivity.
+implements:
+- space: cdf_cdm
+  externalId: CogniteActivity
+  version: v1
+  type: view
+version: {{ datamodelVersion }}
+properties:
+  equipment:
+    container:
+      space: cdf_cdm
+      externalId: CogniteActivity
+      type: container
+    containerPropertyIdentifier: equipment
+    name: Equipment
+    description: Equipment related to the notification.
+    source:
+      space: {{ schemaSpace }}
+      externalId: PalPump
+      version: {{ datamodelVersion }}
+      type: view
+  notificationNumber:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: notificationNumber
+    name: Notification number
+  notificationType:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: notificationType
+    name: Notification type
+  priority:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: priority
+    name: Priority
+  shortText:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: shortText
+    name: Short text
+  longText:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: longText
+    name: Long text
+  createdDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: createdDate
+    name: Created date
+  requiredStartDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: requiredStartDate
+    name: Required start date
+  requiredEndDate:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: requiredEndDate
+    name: Required end date
+  breakdownIndicator:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: breakdownIndicator
+    name: Breakdown indicator
+  status:
+    container:
+      space: {{ schemaSpace }}
+      externalId: PalNotification
+      type: container
+    containerPropertyIdentifier: status
+    name: Status

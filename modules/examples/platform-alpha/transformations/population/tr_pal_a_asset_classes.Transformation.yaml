@@ -1,0 +1,15 @@
+externalId: tr_pal_a_asset_classes
+name: Platform Alpha Pass A - CogniteAssetClass
+destination:
+  type: nodes
+  view:
+    space: cdf_cdm
+    externalId: CogniteAssetClass
+    version: v1
+  instanceSpace: {{ instanceSpace }}
+ignoreNullFields: true
+isPublic: true
+conflictMode: upsert
+authentication:
+  clientId: ${IDP_CLIENT_ID}
+  clientSecret: ${IDP_CLIENT_SECRET}

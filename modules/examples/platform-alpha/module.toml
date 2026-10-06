@@ -1,0 +1,7 @@
+[module]
+title = "Platform Alpha"
+description = "Platform Alpha L100 example: SAP RAW data to an extended Core Data Model, transformations, a time series generator function, a workflow and Atlas agents."
+is_selected_by_default = false
+
+[dependencies]
+modules = []

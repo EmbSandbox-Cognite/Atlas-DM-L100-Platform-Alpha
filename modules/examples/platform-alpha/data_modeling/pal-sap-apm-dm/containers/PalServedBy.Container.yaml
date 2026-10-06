@@ -1,0 +1,15 @@
+space: {{ schemaSpace }}
+externalId: PalServedBy
+usedFor: edge
+name: Pal Served By
+description: Edge properties for pump to lube oil unit servedBy connections (P&ID line number).
+properties:
+  lineNumber:
+    type:
+      type: text
+      list: false
+      collation: ucs_basic
+    nullable: true
+    immutable: false
+    autoIncrement: false
+indexes: {}
